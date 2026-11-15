@@ -68,6 +68,22 @@ def noise_trees(feature, ratio, offset, factor=8, max_water=0, survives=None):
     return {"feature": feature, "placement": placement}
 
 
+def orchard(feature, ratio, offset, factor, bushes, spread, survives):
+    """
+    noise_trees' placement for a patch's middle, then `bushes` tries around it, up to `spread` blocks out and a block up
+    or down, where the plant would stand on open ground: an orchard of clumps where the noise has one, none elsewhere.
+    """
+    placed = noise_trees(feature, ratio, offset, factor=factor)
+    trapezoid = lambda size: {"type": "minecraft:trapezoid", "max": size, "min": -size, "plateau": 0}
+    placed["placement"] += [
+        {"type": "minecraft:count", "count": bushes},
+        {"type": "minecraft:offset", "x": trapezoid(spread), "y": trapezoid(1), "z": trapezoid(spread)},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+            {"type": "minecraft:matching_block_tag", "tag": "minecraft:air"},
+            {"type": "minecraft:would_survive", "state": survives}]}}]
+    return placed
+
+
 def selector(default, *chances):
     return {"type": "minecraft:random_selector", "default": default,
             "features": [{"chance": chance, "feature": feature} for feature, chance in chances]}
@@ -87,9 +103,10 @@ BIOMES = {
         # Cypresses among oaks and fancy oaks
         "trees": selector("minecraft:oak_checked", (f"{MOD}:cypress_checked", 0.4), ("minecraft:fancy_oak_checked", 0.2)),
         "tree_placement": dict(ratio=8, offset=0.1),
-        # Lemon bushes in orchards of their own, on a coarser noise than the oaks', so the two don't share their patches
-        "extra": [("lemon_orchards", noise_trees(f"{MOD}:lemon_bush", 10, -0.1, factor=14,
-                                                     survives={"id": f"{MOD}:lemon_sapling", "properties": {"stage": "0"}}))],
+        # Lemon bushes (two blocks tall, bare, in blossom or fruiting: lemon_bushes, tools/lemons.py) in orchards of their
+        # own, clumps of a few on a coarser noise than the oaks', so the two don't share their patches
+        "extra": [("lemon_orchards", orchard(f"{MOD}:lemon_bushes", 10, -0.1, factor=14, bushes=4, spread=2,
+                                             survives={"id": f"{MOD}:lemon_bush", "properties": {"fruit": "0", "half": "lower"}}))],
         # Fields of flowers and of dry grass (tuscan_fields), the plains' flowers and the savanna's grass between them
         "vegetation": ["minecraft:glow_lichen", f"{MOD}:lemon_orchards", f"{MOD}:trees_tuscan_grove", f"{MOD}:tuscan_flower_field",
                        f"{MOD}:tuscan_dry_grass", "minecraft:flower_plains", "minecraft:patch_grass_savanna", "minecraft:brown_mushroom_normal",

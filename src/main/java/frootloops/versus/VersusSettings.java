@@ -218,7 +218,8 @@ public abstract class VersusSettings {
     }
 
     public static class Lemons {
-        // Lemon leaves go bare -> blossoms -> lemons, one stage on this chance a random tick (about nine minutes a stage)
+        // Lemon bushes (and the lemon leaves of earlier worlds' lemon trees) go bare -> blossoms -> lemons, one stage on
+        // this chance a random tick (about nine minutes a stage)
         public static float FRUIT_GROW_CHANCE = 0.125f;
         // Eating a lemon makes one Sour this long, in ticks: the view widens at once and eases back (SourFov)
         public static int SOUR_TICKS = 30;

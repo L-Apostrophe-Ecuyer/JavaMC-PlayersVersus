@@ -9,6 +9,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.item.component.Compostable;
@@ -91,6 +92,7 @@ public abstract class CustomBlockItems {
 
     public static final BlockItem LEMON_LEAVES = new BlockItem(CustomBlocks.LEMON_LEAVES, compostable(getBlockSettings("lemon_leaves")));
     public static final BlockItem LEMON_SAPLING = new BlockItem(CustomBlocks.LEMON_SAPLING, compostable(getBlockSettings("lemon_sapling")));
+    public static final BlockItem LEMON_BUSH = new DoubleHighBlockItem(CustomBlocks.LEMON_BUSH, compostable(getBlockSettings("lemon_bush")));
 
     /** As vanilla's leaves, saplings and berries: a low chance to raise the composter's level. */
     public static Item.Properties compostable(Item.Properties properties) {

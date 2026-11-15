@@ -2,6 +2,7 @@ package frootloops.versus.gametest;
 
 import frootloops.versus.VersusSettings;
 import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.blocks.fruit.LemonBushBlock;
 import frootloops.versus.mod.environment.blocks.fruit.LemonLeavesBlock;
 import frootloops.versus.mod.environment.blocks.leaves.LeafReach;
 import frootloops.versus.mod.items_and_effects.brewing.CustomStatusEffects;
@@ -11,6 +12,7 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,22 +22,31 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * Lemon bushes: two or three stripped oak logs under lemon leaves; the leaves go bare, blossom and fruit, by random
- * ticks or bone meal; lemons are picked by hand, 2 to 6, and the leaves go bare; oak logs keep the leaves alive; a lemon
- * makes one Sour.
+ * Lemon bushes: two blocks tall, as a rose bush is, whole or gone; they go bare, blossom and fruit, by random ticks or
+ * bone meal; lemons are picked by hand, 2 to 6, and the bush goes bare; the lemon sapling grows into one, and the Tuscan
+ * grove's orchards are patches of them. The lemon trees of earlier worlds (two or three stripped oak logs under lemon
+ * leaves) fruit as the bushes do, oak logs keeping their leaves alive. A lemon makes one Sour.
  */
 public class LemonsGameTest {
 
@@ -52,27 +63,190 @@ public class LemonsGameTest {
                 .mapToInt(item -> item.getItem().getCount()).sum();
     }
 
+    private static BlockState bush(int fruit) {
+        return CustomBlocks.LEMON_BUSH.defaultBlockState().setValue(LemonBushBlock.FRUIT, fruit);
+    }
+
+    /** A lemon bush planted on grass with its bottom at {@code lower} (relative), both halves. */
+    private static BlockPos plantBush(GameTestHelper helper, BlockPos lower, int fruit) {
+        helper.setBlock(lower.below(), Blocks.GRASS_BLOCK.defaultBlockState());
+        DoublePlantBlock.placeAt(helper.getLevel(), bush(fruit), helper.absolutePos(lower), Block.UPDATE_ALL);
+        return lower;
+    }
+
+    /** Whether a whole lemon bush stands with its bottom at {@code lower}, both halves at that stage. */
+    private static boolean wholeBush(GameTestHelper helper, BlockPos lower, int fruit) {
+        BlockState bottom = helper.getBlockState(lower), top = helper.getBlockState(lower.above());
+        return bottom.is(CustomBlocks.LEMON_BUSH) && top.is(CustomBlocks.LEMON_BUSH)
+                && bottom.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.LOWER && top.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER
+                && bottom.getValue(LemonBushBlock.FRUIT) == fruit && top.getValue(LemonBushBlock.FRUIT) == fruit;
+    }
+
+    private static int itemsAround(GameTestHelper helper, BlockPos pos, Item item) {
+        AABB around = new AABB(helper.absolutePos(pos)).inflate(2);
+        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, around, entity -> entity.getItem().is(item)).stream()
+                .mapToInt(entity -> entity.getItem().getCount()).sum();
+    }
+
+    /** Two blocks tall, as a rose bush is; broken by either half it goes whole, and drops itself once. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aLemonBushIsTwoBlocksTallAndBreaksWhole(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        Item item = CustomBlocks.LEMON_BUSH.asItem();
+        BlockPos first = plantBush(helper, new BlockPos(3, 2, 4), LemonLeavesBlock.BARE);
+        helper.assertTrue(wholeBush(helper, first, LemonLeavesBlock.BARE), "the lemon bush isn't two halves: " + helper.getBlockState(first) + ", " + helper.getBlockState(first.above()));
+        level.destroyBlock(helper.absolutePos(first.above()), true);
+        helper.assertTrue(helper.getBlockState(first).isAir() && helper.getBlockState(first.above()).isAir(), "breaking its top left its bottom");
+        BlockPos second = plantBush(helper, new BlockPos(9, 2, 4), LemonLeavesBlock.BARE);
+        level.destroyBlock(helper.absolutePos(second), true);
+        helper.assertTrue(helper.getBlockState(second).isAir() && helper.getBlockState(second.above()).isAir(), "breaking its bottom left its top");
+        int fromTop = itemsAround(helper, first, item), fromBottom = itemsAround(helper, second, item);
+        helper.assertTrue(fromTop == 1 && fromBottom == 1, "broken by its top it dropped " + fromTop + " bushes, by its bottom " + fromBottom + ", not one each");
+        helper.succeed();
+    }
+
+    /** It blossoms, then fruits, both halves together: on random ticks of its bottom, and with bone meal on either half. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aLemonBushBlossomsThenFruitsOnRandomTicksAndBoneMeal(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = plantBush(helper, new BlockPos(4, 2, 4), LemonLeavesBlock.BARE);
+        helper.assertTrue(helper.getBlockState(pos).isRandomlyTicking(), "a bare lemon bush doesn't tick");
+        helper.assertTrue(!helper.getBlockState(pos.above()).isRandomlyTicking(), "its top ticks too: it would fruit twice as fast");
+        float chance = VersusSettings.Lemons.FRUIT_GROW_CHANCE;
+        VersusSettings.Lemons.FRUIT_GROW_CHANCE = 1.0F;
+        try {
+            helper.getBlockState(pos).randomTick(level, helper.absolutePos(pos), RandomSource.create(3));
+            helper.assertTrue(wholeBush(helper, pos, LemonLeavesBlock.BLOSSOMS), "a bare bush didn't blossom, both halves");
+            helper.getBlockState(pos).randomTick(level, helper.absolutePos(pos), RandomSource.create(3));
+            helper.assertTrue(wholeBush(helper, pos, LemonLeavesBlock.LEMONS), "a bush in blossom didn't fruit, both halves");
+        } finally {
+            VersusSettings.Lemons.FRUIT_GROW_CHANCE = chance;
+        }
+        helper.assertTrue(!helper.getBlockState(pos).isRandomlyTicking(), "a fruiting lemon bush still ticks");
+
+        BlockPos other = plantBush(helper, new BlockPos(9, 2, 4), LemonLeavesBlock.BARE);
+        LemonBushBlock block = CustomBlocks.LEMON_BUSH;
+        BlockPos top = helper.absolutePos(other.above());
+        helper.assertTrue(block.isValidBonemealTarget(level, top, helper.getBlockState(other.above()), BonemealSource.INTERACTION), "bone meal can't help a bare bush");
+        block.performBonemeal(level, RandomSource.create(1), top, helper.getBlockState(other.above()), BonemealSource.INTERACTION);
+        helper.assertTrue(wholeBush(helper, other, LemonLeavesBlock.BLOSSOMS), "bone meal on its top didn't make the bush blossom");
+        helper.succeed();
+    }
+
+    /**
+     * Hung with lemons it has nothing left to grow: bone meal gives a lemon sapling instead, as a rose bush gives another of
+     * itself, and the bush keeps its lemons.
+     */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void boneMealOnAFruitingLemonBushGivesASapling(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = plantBush(helper, new BlockPos(6, 2, 4), LemonLeavesBlock.LEMONS);
+        LemonBushBlock block = CustomBlocks.LEMON_BUSH;
+        helper.assertTrue(block.isValidBonemealTarget(level, helper.absolutePos(pos), helper.getBlockState(pos), BonemealSource.INTERACTION), "bone meal can't take a fruiting bush");
+        block.performBonemeal(level, RandomSource.create(1), helper.absolutePos(pos), helper.getBlockState(pos), BonemealSource.INTERACTION);
+        helper.assertTrue(itemsAround(helper, pos, CustomBlocks.LEMON_SAPLING.asItem()) == 1, "bone meal on a fruiting bush gave no lemon sapling");
+        helper.assertTrue(wholeBush(helper, pos, LemonLeavesBlock.LEMONS), "the bush lost its lemons to bone meal");
+        helper.succeed();
+    }
+
+    /** Picked by either half when hung with lemons, it gives 2 to 6 and goes bare; bare, it gives none. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void pickingALemonBushGivesTwoToSixAndLeavesItBare(GameTestHelper helper) {
+        BlockPos pos = plantBush(helper, new BlockPos(6, 2, 4), LemonLeavesBlock.LEMONS);
+        ServerPlayer player = FakePlayer.get(helper.getLevel());
+        BlockPos top = helper.absolutePos(pos.above());
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(top), Direction.NORTH, top, false);
+        InteractionResult result = helper.getBlockState(pos.above()).useWithoutItem(helper.getLevel(), player, hit);
+        helper.assertTrue(result.consumesAction(), "picking the lemons did nothing: " + result);
+        helper.assertTrue(wholeBush(helper, pos, LemonLeavesBlock.BARE), "the bush isn't bare after picking, both halves");
+        int lemons = lemonsAround(helper, pos.above());
+        helper.assertTrue(lemons >= 2 && lemons <= 6, lemons + " lemons picked, not 2 to 6");
+        BlockPos bottom = helper.absolutePos(pos);
+        InteractionResult again = helper.getBlockState(pos).useWithoutItem(helper.getLevel(), player, new BlockHitResult(Vec3.atCenterOf(bottom), Direction.NORTH, bottom, false));
+        helper.assertTrue(!again.consumesAction() && lemonsAround(helper, pos.above()) == lemons, "a bare bush gave lemons");
+        helper.succeed();
+    }
+
+    /** Broken, a fruiting bush drops itself (from its bottom: its top drops nothing of its own) and its lemons. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aBrokenFruitingLemonBushDropsItselfAndItsLemons(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = plantBush(helper, new BlockPos(6, 2, 4), LemonLeavesBlock.LEMONS);
+        Item item = CustomBlocks.LEMON_BUSH.asItem();
+        List<ItemStack> drops = Block.getDrops(helper.getBlockState(pos), level, helper.absolutePos(pos), null, null, ItemStack.EMPTY);
+        int bushes = drops.stream().filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum();
+        int lemons = drops.stream().filter(stack -> stack.is(Fruits.LEMON)).mapToInt(ItemStack::getCount).sum();
+        helper.assertTrue(bushes == 1, "a broken bush dropped " + bushes + " bushes");
+        helper.assertTrue(lemons >= 2 && lemons <= 6, "a broken fruiting bush dropped " + lemons + " lemons");
+        List<ItemStack> topDrops = Block.getDrops(helper.getBlockState(pos.above()), level, helper.absolutePos(pos.above()), null, null, ItemStack.EMPTY);
+        helper.assertTrue(topDrops.isEmpty(), "its top dropped " + topDrops + " of its own");
+        List<ItemStack> bareDrops = Block.getDrops(bush(LemonLeavesBlock.BARE), level, helper.absolutePos(pos), null, null, ItemStack.EMPTY);
+        helper.assertTrue(bareDrops.stream().noneMatch(stack -> stack.is(Fruits.LEMON)), "a bare bush dropped lemons");
+        helper.succeed();
+    }
+
+    /** The lemon sapling grows into a lemon bush, bare. */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void theLemonSaplingGrowsIntoALemonBush(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(6, 2, 4);
+        helper.setBlock(pos.below(), Blocks.GRASS_BLOCK.defaultBlockState());
+        helper.setBlock(pos, CustomBlocks.LEMON_SAPLING.defaultBlockState().setValue(SaplingBlock.STAGE, 1));
+        ((SaplingBlock) CustomBlocks.LEMON_SAPLING).advanceTree(helper.getLevel(), helper.absolutePos(pos), helper.getBlockState(pos), RandomSource.create(5));
+        helper.assertTrue(wholeBush(helper, pos, LemonLeavesBlock.BARE), "the lemon sapling didn't grow into a bare lemon bush: " + helper.getBlockState(pos) + ", " + helper.getBlockState(pos.above()));
+        helper.succeed();
+    }
+
+    /**
+     * The orchards' bushes (lemon_bushes, what the Tuscan grove's lemon_orchards place): whole bushes, at more than one
+     * stage, and no lemon leaves.
+     */
     @GameTest(structure = GROVE, maxTicks = 20)
-    public void aLemonBushIsTwoOrThreeStrippedOakLogsUnderLemonLeaves(GameTestHelper helper) {
+    public void theOrchardsAreLemonBushes(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        Feature bushes = level.registryAccess().lookupOrThrow(Registries.FEATURE).getValue(Identifier.fromNamespaceAndPath("players-versus", "lemon_bushes"));
+        helper.assertTrue(bushes != null, "no lemon_bushes feature");
+        PlacedFeature orchards = level.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE).getValue(Identifier.fromNamespaceAndPath("players-versus", "lemon_orchards"));
+        helper.assertTrue(orchards != null && orchards.feature().value() == bushes, "the lemon orchards don't place lemon_bushes");
+        Set<Integer> stages = new HashSet<>();
+        int placed = 0;
+        for (int i = 0; i < 12; i++) {
+            BlockPos at = new BlockPos(4 + 3 * i, 1, 10);
+            if (!bushes.place(level, level.getChunkSource().getGenerator(), RandomSource.create(i), helper.absolutePos(at))) continue;
+            placed++;
+            BlockState bottom = helper.getBlockState(at);
+            helper.assertTrue(bottom.is(CustomBlocks.LEMON_BUSH) && wholeBush(helper, at, bottom.getValue(LemonBushBlock.FRUIT)), "the orchard placed no whole bush at " + at.toShortString());
+            stages.add(bottom.getValue(LemonBushBlock.FRUIT));
+        }
+        helper.assertTrue(placed >= 10, "only " + placed + " bushes placed of 12");
+        helper.assertTrue(stages.size() > 1, "the orchard's bushes are all at one stage: " + stages);
+        for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(0, 1, 6), new BlockPos(47, 4, 14))) {
+            helper.assertTrue(!helper.getBlockState(pos).is(CustomBlocks.LEMON_LEAVES), "lemon leaves in the orchard at " + pos.toShortString());
+        }
+        helper.succeed();
+    }
+
+    /** The lemon tree of earlier worlds (kept for them, and for /place): two or three stripped oak logs under lemon leaves. */
+    @GameTest(structure = GROVE, maxTicks = 20)
+    public void aLemonTreeIsTwoOrThreeStrippedOakLogsUnderLemonLeaves(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         int grown = 0;
         for (int i = 0; i < 6; i++) {
             BlockPos foot = new BlockPos(6 + 7 * i, 1, 8);
-            boolean placed = level.registryAccess().lookupOrThrow(Registries.FEATURE).getOrThrow(CustomBlocks.LEMON_BUSH).value()
+            boolean placed = level.registryAccess().lookupOrThrow(Registries.FEATURE).getOrThrow(CustomBlocks.LEMON_TREE).value()
                     .place(level, level.getChunkSource().getGenerator(), RandomSource.create(i), helper.absolutePos(foot));
             if (!placed) continue;
             grown++;
             int logs = 0;
             while (helper.getBlockState(foot.above(logs)).is(Blocks.STRIPPED_OAK_LOG)) logs++;
-            helper.assertTrue(logs >= 2 && logs <= 3, "a lemon bush grew " + logs + " stripped oak logs");
+            helper.assertTrue(logs >= 2 && logs <= 3, "a lemon tree grew " + logs + " stripped oak logs");
             helper.assertTrue(helper.getBlockState(foot.above(logs)).is(CustomBlocks.LEMON_LEAVES), "no lemon leaves top the trunk");
             int leaves = 0;
             for (BlockPos pos : BlockPos.betweenClosed(foot.offset(-2, 0, -2), foot.offset(2, logs + 1, 2))) {
                 if (helper.getBlockState(pos).is(CustomBlocks.LEMON_LEAVES)) leaves++;
             }
-            helper.assertTrue(leaves >= 12, "a lemon bush has only " + leaves + " leaves");
+            helper.assertTrue(leaves >= 12, "a lemon tree has only " + leaves + " leaves");
         }
-        helper.assertTrue(grown > 0, "no lemon bush grew");
+        helper.assertTrue(grown > 0, "no lemon tree grew");
         helper.succeed();
     }
 

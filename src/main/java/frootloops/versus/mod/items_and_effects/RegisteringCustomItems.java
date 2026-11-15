@@ -159,6 +159,8 @@ public abstract class RegisteringCustomItems {
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.OAK_LEAVES, CustomBlockItems.LEMON_LEAVES));
         registerCustomItem("lemon_sapling", CustomBlockItems.LEMON_SAPLING);
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.OAK_SAPLING, CustomBlockItems.LEMON_SAPLING));
+        registerCustomItem("lemon_bush", CustomBlockItems.LEMON_BUSH);
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.ROSE_BUSH, CustomBlockItems.LEMON_BUSH));
         frootloops.versus.mod.items_and_effects.fruit.Fruits.create();
         registerCustomItem("lemon", frootloops.versus.mod.items_and_effects.fruit.Fruits.LEMON);
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> output.insertAfter(Items.SWEET_BERRIES, frootloops.versus.mod.items_and_effects.fruit.Fruits.LEMON));

@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "fruit=0,half=lower": {
+      "model": "players-versus:block/lemon_bush_bottom"
+    },
+    "fruit=0,half=upper": {
+      "model": "players-versus:block/lemon_bush_top"
+    },
+    "fruit=1,half=lower": {
+      "model": "players-versus:block/lemon_bush_bottom_blossoms"
+    },
+    "fruit=1,half=upper": {
+      "model": "players-versus:block/lemon_bush_top_blossoms"
+    },
+    "fruit=2,half=lower": {
+      "model": "players-versus:block/lemon_bush_bottom_lemons"
+    },
+    "fruit=2,half=upper": {
+      "model": "players-versus:block/lemon_bush_top_lemons"
+    }
+  }
+}

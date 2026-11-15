@@ -3,12 +3,17 @@
 
     python3 tools/lemons.py <vanilla>     (<vanilla> holds assets/minecraft and data/minecraft, from the game's jars)
 
-Lemon leaves (LemonLeavesBlock) are oak's leaves that fruit: bare, in blossom, hung with lemons. Their texture is oak
-leaves' (the biome tints it, layer 0); the blossoms and lemons are an untinted second layer drawn only on the leaves'
-own pixels, so the fruit stays yellow in every biome. Also the lemon (item), the lemon sapling (oak's, glossier, a
-lemon on it) and its pot, Sour's effect icon (a lemon slice), the blockstates, models and item definitions, the loot
-tables (leaves as oak's without the apple, lemons when fruiting; the picking table, 2 to 6), the tags and the names in
-every language file.
+The lemon bush (LemonBushBlock) is two blocks tall, as the rose bush is, and drawn from the rose bush's textures: its
+leaves a glossier, darker green, and where the roses were, more leaves (bare), white blossoms with yellow hearts, or
+lemons (the leaves' own, one a rose), by its stage. The orchards (lemon_bushes, at every stage) and the sapling (lemon_bush_plant, bare) place it.
+
+Lemon leaves (LemonLeavesBlock) are oak's leaves that fruit: bare, in blossom, hung with lemons, the leaves of the
+lemon trees earlier worlds have (nothing generates or grows them now). Their texture is oak leaves' (the biome tints
+it, layer 0); the blossoms and lemons are an untinted second layer drawn only on the leaves' own pixels, so the fruit
+stays yellow in every biome. Also the lemon (item), the lemon sapling (oak's, glossier, a lemon on it) and its pot,
+Sour's effect icon (a lemon slice), the blockstates, models and item definitions, the loot tables (leaves as oak's
+without the apple, lemons when fruiting; the bush as the rose bush, from its lower half, with its lemons; the picking
+tables, 2 to 6), the tags and the names in every language file.
 """
 import json
 import os
@@ -140,6 +145,80 @@ def sour_icon():
     return image
 
 
+def citrus(colour):
+    """A leaf's green made a citrus leaf's: glossier and darker, as the sapling's."""
+    r, g, b, a = colour
+    return (int(r * 0.75), min(255, int(g * 0.95)), int(b * 0.7), a)
+
+
+def is_rose(colour):
+    r, g, b, a = colour
+    return a > 0 and r > g + 30
+
+
+def rose_shade(rose, roses):
+    """A rose pixel's shade, 0 (the lightest of the roses' colours) to 4 (the darkest)."""
+    ranked = sorted(roses, key=lambda c: -(c[0] * 3 + c[1] * 6 + c[2]))
+    return min(4, ranked.index(rose) * 5 // len(ranked))
+
+
+BARE_SHADES = [(74, 143, 40, 255), (43, 112, 42, 255), (38, 90, 37, 255), (32, 70, 38, 255), (32, 70, 38, 255)]
+BLOSSOM_SHADES = [(255, 255, 250, 255), BLOSSOM, (236, 230, 212, 255), (214, 204, 176, 255), BLOSSOM_HEART]
+
+
+def rose_clusters(image):
+    """The rose bush's roses: each a group of touching rose pixels."""
+    left = {(x, y) for y in range(16) for x in range(16) if is_rose(image.getpixel((x, y)))}
+    clusters = []
+    while left:
+        todo, cluster = [left.pop()], set()
+        while todo:
+            x, y = todo.pop()
+            cluster.add((x, y))
+            for neighbour in [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
+                if neighbour in left:
+                    left.remove(neighbour)
+                    todo.append(neighbour)
+        clusters.append(cluster)
+    return sorted(clusters, key=min)
+
+
+def bush(rose_bush, shades, leafy):
+    """
+    The rose bush's texture made the lemon bush's: its leaves citrus green; its roses, shade for shade, in the stage's
+    colours (more leaves, made citrus too, when it's bare).
+    """
+    image = rose_bush.copy().convert("RGBA")
+    roses = sorted({image.getpixel((x, y)) for y in range(16) for x in range(16) if is_rose(image.getpixel((x, y)))})
+    for y in range(16):
+        for x in range(16):
+            colour = image.getpixel((x, y))
+            if colour[3] == 0:
+                continue
+            if is_rose(colour):
+                shade = shades[rose_shade(colour, roses)]
+                image.putpixel((x, y), citrus(shade) if leafy else shade)
+            else:
+                image.putpixel((x, y), citrus(colour))
+    return image
+
+
+def fruiting(rose_bush):
+    """The bare bush with a lemon (the lemon leaves' own) hanging where each rose was."""
+    image = bush(rose_bush, BARE_SHADES, True)
+    rose_bush = rose_bush.convert("RGBA")
+    mask = {(x, y) for y in range(16) for x in range(16) if rose_bush.getpixel((x, y))[3] > 0}
+    for cluster in rose_clusters(rose_bush):
+        x = round(sum(px for px, _ in cluster) / len(cluster)) - 1
+        y = round(sum(py for _, py in cluster) / len(cluster)) - 2
+        lemon_at(image, x, y, mask)
+    return image
+
+
+# The bush's stages, by FRUIT: bare (more leaves where the roses were), in blossom, hung with lemons
+BUSH_STAGES = [("", lambda rose: bush(rose, BARE_SHADES, True)), ("_blossoms", lambda rose: bush(rose, BLOSSOM_SHADES, False)), ("_lemons", fruiting)]
+
+
 def leaves_model(overlay):
     """Vanilla's leaves model, then the same cube again in an untinted overlay (blossoms or lemons)."""
     faces = {}
@@ -194,6 +273,19 @@ def assets(vanilla):
     write_json(ASSETS, f"{models}/item/lemon.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/lemon"}})
     write_json(ASSETS, f"{MOD}/items/lemon.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/lemon"}})
 
+    # The lemon bush: a cross of the rose bush's shape for each half and stage; its item shows its top with lemons
+    variants = {}
+    for fruit, (suffix, draw) in enumerate(BUSH_STAGES):
+        for half, part in [("lower", "bottom"), ("upper", "top")]:
+            rose = Image.open(os.path.join(textures, "block", f"rose_bush_{part}.png"))
+            save(draw(rose), f"block/lemon_bush_{part}{suffix}.png")
+            write_json(ASSETS, f"{models}/block/lemon_bush_{part}{suffix}.json",
+                       {"parent": "minecraft:block/cross", "textures": {"cross": f"{MOD}:block/lemon_bush_{part}{suffix}"}})
+            variants[f"fruit={fruit},half={half}"] = {"model": f"{MOD}:block/lemon_bush_{part}{suffix}"}
+    write_json(ASSETS, f"{MOD}/blockstates/lemon_bush.json", {"variants": variants})
+    write_json(ASSETS, f"{models}/item/lemon_bush.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:block/lemon_bush_top_lemons"}})
+    write_json(ASSETS, f"{MOD}/items/lemon_bush.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/lemon_bush"}})
+
 
 def loot(vanilla):
     with open(os.path.join(vanilla, "data", "minecraft", "loot_table", "blocks", "oak_leaves.json")) as file:
@@ -219,6 +311,24 @@ def loot(vanilla):
         "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{MOD}:lemon",
                                             "modifier": {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 2, "max": 6}}}]}],
         "random_sequence": f"{MOD}:harvest/lemon_leaves",
+    })
+    # The bush drops as the rose bush does, from its lower half (breaking either half breaks both), and its lemons with it
+    with open(os.path.join(vanilla, "data", "minecraft", "loot_table", "blocks", "rose_bush.json")) as file:
+        bush_table = json.loads(file.read().replace("minecraft:rose_bush", f"{MOD}:lemon_bush"))
+    bush_table["pools"].append({
+        "rolls": 1,
+        "condition": {"type": "minecraft:match_block", "blocks": f"{MOD}:lemon_bush", "state": {"half": "lower", "fruit": "2"}},
+        "entries": [{"type": "minecraft:item", "name": f"{MOD}:lemon", "modifier": [
+            {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 2, "max": 6}},
+            {"type": "minecraft:explosion_decay"}]}],
+    })
+    bush_table["random_sequence"] = f"{MOD}:blocks/lemon_bush"
+    write_json(DATA, f"{MOD}/loot_table/blocks/lemon_bush.json", bush_table)
+    write_json(DATA, f"{MOD}/loot_table/harvest/lemon_bush.json", {
+        "type": picking["type"],
+        "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{MOD}:lemon",
+                                            "modifier": {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 2, "max": 6}}}]}],
+        "random_sequence": f"{MOD}:harvest/lemon_bush",
     })
     for name, oak_name in [("lemon_sapling", "oak_sapling"), ("potted_lemon_sapling", "potted_oak_sapling")]:
         with open(os.path.join(vanilla, "data", "minecraft", "loot_table", "blocks", f"{oak_name}.json")) as file:
@@ -246,6 +356,10 @@ def tags():
     add_to_tag("minecraft/tags/item/saplings.json", f"{MOD}:lemon_sapling")
     add_to_tag("minecraft/tags/block/flower_pots.json", f"{MOD}:potted_lemon_sapling")
     add_to_tag(f"{MOD}/tags/block/sheds_fallen_leaves.json", f"{MOD}:lemon_leaves")
+    # The bush as the rose bush: bees come to it, trees and huge mushrooms grow through it, water washes it away (but it's
+    # no flower: no dye, no bee food)
+    for tag in ["bee_attractive", "replaceable_by_trees", "replaceable_by_mushrooms", "washed_away_by_fluids"]:
+        add_to_tag(f"minecraft/tags/block/{tag}.json", f"{MOD}:lemon_bush")
 
 
 NAMES = {
@@ -254,6 +368,7 @@ NAMES = {
         "block.players-versus.lemon_leaves": "Lemon Leaves",
         "block.players-versus.lemon_sapling": "Lemon Sapling",
         "block.players-versus.potted_lemon_sapling": "Potted Lemon Sapling",
+        "block.players-versus.lemon_bush": "Lemon Bush",
         "effect.players-versus.sour": "Sour",
     },
     "fr": {
@@ -261,6 +376,7 @@ NAMES = {
         "block.players-versus.lemon_leaves": "Feuilles de citronnier",
         "block.players-versus.lemon_sapling": "Pousse de citronnier",
         "block.players-versus.potted_lemon_sapling": "Pousse de citronnier en pot",
+        "block.players-versus.lemon_bush": "Buisson de citronnier",
         "effect.players-versus.sour": "Acidité",
     },
 }
@@ -292,10 +408,19 @@ def add_names(names):
 
 def worldgen():
     """
-    The lemon bush, which the lemon sapling grows too: two or three stripped oak logs under oak's round crown (a blob
-    of radius 2, three layers), which on so short a trunk hangs nearly to the ground. Its leaves start at every stage,
-    some already fruiting; now and then a beehive, for the blossoms.
+    The lemon bush's features: lemon_bush_plant, a bare bush, which the lemon sapling grows into; lemon_bushes, a bush at
+    any stage (bare 4, in blossom 2, fruiting 4), which the Tuscan grove's orchards place in patches (their placement,
+    lemon_orchards, is the grove's: tools/transition-biomes.py).
+
+    Then the lemon tree of earlier versions (feature lemon_bush, kept for /place; nothing grows or generates it now): two
+    or three stripped oak logs under oak's round crown (a blob of radius 2, three layers), which on so short a trunk
+    hangs nearly to the ground. Its leaves start at every stage, some already fruiting; now and then a beehive.
     """
+    bush = {"id": f"{MOD}:lemon_bush", "properties": {"fruit": "0", "half": "lower"}}
+    write_json(DATA, f"{MOD}/worldgen/feature/lemon_bush_plant.json", {"type": "minecraft:simple_block", "to_place": bush})
+    write_json(DATA, f"{MOD}/worldgen/feature/lemon_bushes.json", {"type": "minecraft:simple_block", "to_place": {"type": "minecraft:weighted", "entries": [
+        {"data": {"id": f"{MOD}:lemon_bush", "properties": {"fruit": fruit, "half": "lower"}}, "weight": weight}
+        for fruit, weight in [("0", 4), ("1", 2), ("2", 4)]]}})
     leaves = {"distance": "7", "persistent": "false", "waterlogged": "false"}
     write_json(DATA, f"{MOD}/worldgen/feature/lemon_bush.json", {
         "type": "minecraft:tree",

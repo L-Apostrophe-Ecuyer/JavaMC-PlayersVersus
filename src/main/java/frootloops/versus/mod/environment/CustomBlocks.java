@@ -24,6 +24,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
+import frootloops.versus.mod.environment.blocks.fruit.LemonBushBlock;
 import frootloops.versus.mod.environment.blocks.fruit.LemonLeavesBlock;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.Block;
@@ -88,9 +89,15 @@ public class CustomBlocks {
     public static LemonLeavesBlock LEMON_LEAVES;
     public static Block LEMON_SAPLING;
     public static Block POTTED_LEMON_SAPLING;
-    /** A lemon bush: two or three stripped oak logs under a round crown of lemon leaves (worldgen/feature/lemon_bush). */
-    public static final ResourceKey<Feature> LEMON_BUSH = ResourceKey.create(Registries.FEATURE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "lemon_bush"));
-    public static final TreeGrower LEMON = new TreeGrower(VersusMod.MOD_ID + ":lemon", WeightedList.<ResourceKey<Feature>>of(LEMON_BUSH),
+    public static LemonBushBlock LEMON_BUSH;
+    /**
+     * The lemon tree of earlier versions (worldgen/feature/lemon_bush): two or three stripped oak logs under a round crown
+     * of lemon leaves. Nothing grows or generates it any more (lemons grow on lemon bushes); kept for /place.
+     */
+    public static final ResourceKey<Feature> LEMON_TREE = ResourceKey.create(Registries.FEATURE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "lemon_bush"));
+    /** A bare lemon bush (worldgen/feature/lemon_bush_plant): what the lemon sapling grows into. */
+    public static final ResourceKey<Feature> LEMON_BUSH_PLANT = ResourceKey.create(Registries.FEATURE, Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "lemon_bush_plant"));
+    public static final TreeGrower LEMON = new TreeGrower(VersusMod.MOD_ID + ":lemon", WeightedList.<ResourceKey<Feature>>of(LEMON_BUSH_PLANT),
             WeightedList.of(), WeightedList.of(), null);
     // What growing trees are made of (TreeBlock), one per wood, by the vanilla log each stands for
     public static final Map<Block, TreeBlock> TREE_BLOCKS = new LinkedHashMap<>();
@@ -178,6 +185,9 @@ public class CustomBlocks {
         FlammableBlockRegistry.getDefaultInstance().add(LEMON_LEAVES, 30, 60); // as leaves
         LEMON_SAPLING = registerBlock("lemon_sapling", new SaplingBlock(LEMON, getSettings("lemon_sapling", Blocks.OAK_SAPLING)));
         POTTED_LEMON_SAPLING = registerBlock("potted_lemon_sapling", new FlowerPotBlock(LEMON_SAPLING, getSettings("potted_lemon_sapling", Blocks.POTTED_OAK_SAPLING)));
+        // Two blocks tall, as the rose bush (whose properties it takes): it burns as the tall flowers do
+        LEMON_BUSH = (LemonBushBlock) registerBlock("lemon_bush", new LemonBushBlock(getSettings("lemon_bush", Blocks.ROSE_BUSH)));
+        FlammableBlockRegistry.getDefaultInstance().add(LEMON_BUSH, 60, 100);
 
         for (Block log : List.of(Blocks.OAK_LOG, Blocks.SPRUCE_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.CHERRY_LOG,
                 Blocks.DARK_OAK_LOG, Blocks.PALE_OAK_LOG, Blocks.MANGROVE_LOG, Blocks.POPLAR_LOG)) {
