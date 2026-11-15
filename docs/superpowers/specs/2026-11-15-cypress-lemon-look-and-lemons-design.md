@@ -1,0 +1,50 @@
+# The cypress, the lemon bush's look, and lemons as food
+
+Asked (2026-11-15), with a reference picture of a "Medium Cypress Tree":
+
+- "Cypress trees overhaul: spruce as wood type, and mix of spruce leaves and lighter Cyprus leaves (same texture as spruce
+  but with azalea colors) for highlights. The shape ought to be more pear-like and fuzzy, too."
+- "Lemon bushes: the idea is there but texture ought to look like an actual tiny tree. And the 'leaf' part at the top
+  ought to have a bushier model than just X cross."
+- "Lemons: give one hunger, zero saturation, and take 40 ticks to eat. Gives 4 seconds of sourness effect (FOV), 4 seconds
+  of slowness, and 24 seconds of haste 1."
+
+## What the code does now
+
+- **The cypress** (`players-versus:cypress`, the Tuscan grove's): a spruce trunk of 12 or 13 blocks under a column of
+  spruce leaves, three blocks across (vanilla's spruce foliage placer at radius 1), from a block or two above the ground to
+  a little over the trunk's top. The picture's tree is narrow at its foot, widest in its lower third, tapering to a
+  one-leaf spire, with single leaves sticking out (fuzzy) and lighter, yellow-green leaves among the dark ones, mostly on
+  its outside and up high.
+- **The lemon bush** (`LemonBushBlock`): two halves, each a cross of the rose bush's textures recoloured: citrus green,
+  with more leaves, blossoms or lemons where the roses were. The item is the top half's picture.
+- **A lemon**: food as sweet berries (2 hunger, 0.1 saturation modifier), eaten in vanilla's 32 ticks; it makes one Sour
+  (`SOUR_TICKS`, 30 ticks: the view widens and eases back, `SourFov`).
+
+## Decisions
+
+1. **Lemons**: 1 hunger, no saturation, 40 ticks to eat. Eating one gives Sour for 4 seconds (80 ticks), Slowness I for
+   4 seconds and Haste I for 24 seconds (480 ticks). `VersusSettings.Lemons` holds the numbers. The Sour view widens at
+   once, holds a second, and eases back over its last three seconds (its fall, 22 ticks for the old 30-tick Sour, would
+   have held the widest view for nearly three seconds).
+2. **Cypress leaves** (`players-versus:cypress_leaves`): a block of their own, spruce leaves' texture in azalea leaves'
+   colours (untinted: the same yellow-green in every biome), otherwise spruce leaves: they live by spruce logs, decay away
+   from them, drop as spruce leaves do (saplings, sticks; themselves to shears or silk touch), and are leaves to every tag
+   that knows leaves.
+3. **The cypress**: the spruce trunk stays. Its crown is placed by a foliage placer of the mod's
+   (`players-versus:cypress_foliage_placer`): pear-shaped (narrow at its foot, widest in its lower third, then three blocks
+   across, then a spire of single leaves over the trunk's top), fuzzy (now and then a single leaf one block further out,
+   most in the wide part; now and then a corner missing), its leaves spruce leaves inside and cypress leaves for highlights
+   on the outside, the more the higher (the spire nearly all cypress). No leaf more than two blocks from the trunk.
+4. **The lemon bush's look**: a tiny tree. Its lower half a trunk (an oak-bark stem); its upper half a bushy crown (a
+   rounded box of citrus-green leaves, wider than the stem, reaching down over the trunk's top) carrying its stage
+   (bare, blossoms, lemons) on its faces, as the lemon leaves carry theirs. The item is a tiny tree's picture. The cross
+   models go. Everything the bush does stays.
+
+## Checks
+
+- Game tests: eating a lemon gives the three effects for their times, takes 40 ticks, fills one hunger and no
+  saturation; cypress leaves live by spruce logs and drop as spruce leaves; grown cypresses are pears (wider below than
+  above, a spire on top, nothing beyond two blocks from the trunk) of both leaves (cypress ones more up high).
+- Data: the bush's models and blockstates (trunk below, crowns above, every stage).
+- The gallery: a cypress and lemon bushes up close, looked at.

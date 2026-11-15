@@ -221,13 +221,18 @@ public abstract class VersusSettings {
         // Lemon bushes (and the lemon leaves of earlier worlds' lemon trees) go bare -> blossoms -> lemons, one stage on
         // this chance a random tick (about nine minutes a stage)
         public static float FRUIT_GROW_CHANCE = 0.125f;
-        // Eating a lemon makes one Sour this long, in ticks: the view widens at once and eases back (SourFov)
-        public static int SOUR_TICKS = 30;
+        // A lemon is a little food (1 hunger, no saturation) eaten in this many ticks
+        public static int EAT_TICKS = 40;
+        // Eating one makes one Sour this long, in ticks: the view widens at once and eases back (SourFov); slow as long, and
+        // hasty (Haste I) for this long
+        public static int SOUR_TICKS = 80;
+        public static int SLOWNESS_TICKS = 80;
+        public static int HASTE_TICKS = 480;
         // How far the view widens at its widest (times the player's field of view, scaled by the FOV Effects slider)
         public static float SOUR_PEAK = 1.9f;
         // The view widens over this many ticks, and eases back over the last this many
         public static int SOUR_RISE_TICKS = 2;
-        public static int SOUR_FALL_TICKS = 22;
+        public static int SOUR_FALL_TICKS = 60;
         // However wide the player's own field of view, Sour never takes it past this (degrees)
         public static float SOUR_MAX_FOV = 165.0f;
     }
