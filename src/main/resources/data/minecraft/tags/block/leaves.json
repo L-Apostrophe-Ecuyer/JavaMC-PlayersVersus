@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "players-versus:lemon_leaves"
+    "players-versus:lemon_leaves",
+    "players-versus:cypress_leaves"
   ]
 }

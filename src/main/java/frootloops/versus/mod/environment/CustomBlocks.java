@@ -29,6 +29,7 @@ import frootloops.versus.mod.environment.blocks.fruit.LemonLeavesBlock;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.grower.TreeGrower;
@@ -49,6 +50,7 @@ import net.minecraft.world.level.block.sounds.BlockSoundSets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 public class CustomBlocks {
@@ -90,6 +92,8 @@ public class CustomBlocks {
     public static Block LEMON_SAPLING;
     public static Block POTTED_LEMON_SAPLING;
     public static LemonBushBlock LEMON_BUSH;
+    /** The cypress's lighter leaves, for highlights among its spruce leaves: spruce leaves in azalea leaves' colours. */
+    public static LeavesBlock CYPRESS_LEAVES;
     /**
      * The lemon tree of earlier versions (worldgen/feature/lemon_bush): two or three stripped oak logs under a round crown
      * of lemon leaves. Nothing grows or generates it any more (lemons grow on lemon bushes); kept for /place.
@@ -188,6 +192,8 @@ public class CustomBlocks {
         // Two blocks tall, as the rose bush (whose properties it takes): it burns as the tall flowers do
         LEMON_BUSH = (LemonBushBlock) registerBlock("lemon_bush", new LemonBushBlock(getSettings("lemon_bush", Blocks.ROSE_BUSH)));
         FlammableBlockRegistry.getDefaultInstance().add(LEMON_BUSH, 60, 100);
+        CYPRESS_LEAVES = (LeavesBlock) registerBlock("cypress_leaves", new LeavesBlock(Optional.empty(), getSettings("cypress_leaves", Blocks.SPRUCE_LEAVES)));
+        FlammableBlockRegistry.getDefaultInstance().add(CYPRESS_LEAVES, 30, 60); // as leaves
 
         for (Block log : List.of(Blocks.OAK_LOG, Blocks.SPRUCE_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.CHERRY_LOG,
                 Blocks.DARK_OAK_LOG, Blocks.PALE_OAK_LOG, Blocks.MANGROVE_LOG, Blocks.POPLAR_LOG)) {

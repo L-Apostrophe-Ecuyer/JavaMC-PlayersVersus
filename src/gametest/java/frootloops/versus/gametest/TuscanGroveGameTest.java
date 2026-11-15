@@ -1,5 +1,7 @@
 package frootloops.versus.gametest;
 
+import frootloops.versus.mod.environment.CustomBlocks;
+import frootloops.versus.mod.environment.blocks.leaves.LeafReach;
 import frootloops.versus.mod.environment.blocks.trees.TreeBlock;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -9,6 +11,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,6 +21,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -120,6 +126,28 @@ public class TuscanGroveGameTest {
         }
         helper.assertTrue(dryGrass >= 20, "only " + dryGrass + " dry grass in the field");
         clear(helper);
+        helper.succeed();
+    }
+
+    /**
+     * Cypress leaves are spruce leaves in lighter colours: leaves, alive by spruce logs (not oak); shears take them,
+     * otherwise they drop as spruce leaves (spruce saplings and sticks, never themselves).
+     */
+    @GameTest(structure = GROVE, maxTicks = 20)
+    public void cypressLeavesAreSpruceLeavesInLighterColours(GameTestHelper helper) {
+        Block cypress = CustomBlocks.CYPRESS_LEAVES;
+        BlockState state = cypress.defaultBlockState();
+        helper.assertTrue(state.is(BlockTags.LEAVES), "cypress leaves aren't leaves");
+        helper.assertTrue(LeafReach.isOwnLog(cypress, Blocks.SPRUCE_LOG.defaultBlockState()), "a spruce log doesn't keep cypress leaves alive");
+        helper.assertTrue(!LeafReach.isOwnLog(cypress, Blocks.OAK_LOG.defaultBlockState()), "an oak log keeps cypress leaves alive");
+        ServerLevel level = helper.getLevel();
+        BlockPos at = helper.absolutePos(new BlockPos(5, 5, 5));
+        List<ItemStack> sheared = Block.getDrops(state, level, at, null, null, new ItemStack(Items.SHEARS));
+        helper.assertTrue(sheared.size() == 1 && sheared.getFirst().is(cypress.asItem()), "shears took " + sheared);
+        Set<Item> dropped = new HashSet<>();
+        for (int i = 0; i < 400; i++) Block.getDrops(state, level, at, null, null, ItemStack.EMPTY).forEach(stack -> dropped.add(stack.getItem()));
+        helper.assertTrue(dropped.contains(Items.SPRUCE_SAPLING) && dropped.contains(Items.STICK) && !dropped.contains(cypress.asItem()),
+                "cypress leaves dropped " + dropped + " in 400 breaks");
         helper.succeed();
     }
 }

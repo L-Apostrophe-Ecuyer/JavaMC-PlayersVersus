@@ -93,6 +93,7 @@ public abstract class CustomBlockItems {
     public static final BlockItem LEMON_LEAVES = new BlockItem(CustomBlocks.LEMON_LEAVES, compostable(getBlockSettings("lemon_leaves")));
     public static final BlockItem LEMON_SAPLING = new BlockItem(CustomBlocks.LEMON_SAPLING, compostable(getBlockSettings("lemon_sapling")));
     public static final BlockItem LEMON_BUSH = new DoubleHighBlockItem(CustomBlocks.LEMON_BUSH, compostable(getBlockSettings("lemon_bush")));
+    public static final BlockItem CYPRESS_LEAVES = new BlockItem(CustomBlocks.CYPRESS_LEAVES, compostable(getBlockSettings("cypress_leaves")));
 
     /** As vanilla's leaves, saplings and berries: a low chance to raise the composter's level. */
     public static Item.Properties compostable(Item.Properties properties) {
