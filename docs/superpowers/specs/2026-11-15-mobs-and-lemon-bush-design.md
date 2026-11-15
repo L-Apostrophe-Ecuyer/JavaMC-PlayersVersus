@@ -74,6 +74,9 @@ Asked (2026-11-15), alongside finishing the refinement pass:
   `natural_ground`, feeds the undead's, the creepers' and the pale mobs' spawn tags. The spiders' fate was their own
   rule (`SpiderMixin`): no spider above y 64 wherever the sky's light was over 2 (most of the land) nor below y -8; they
   now spawn in the dark from the pale line to y 128, open sky included.
+- **After the final review**: the rules are the overworld's only (`MobSpawning.ruled`; the soul sand valleys' skeletons
+  stand on soul sand), and zombies' and skeletons' kin (husks, zombie villagers, strays, bogged, parched, frostbites) spawn
+  only on natural ground too, the sky left to their own rules.
 - **The pale kin** (`PaleKin`, `NaturalSpawnerPaleKinMixin`): the spawner keeps the biome's entry it picked (it checks
   the biome still lists it) and reads its kind as the pale kin, for the place's checks, the spawn's cost and the mob it
   makes. Zombies, husks and zombie villagers become pale zombies; creepers pale creepers; spiders and cave spiders pale
@@ -87,7 +90,8 @@ Asked (2026-11-15), alongside finishing the refinement pass:
 - **The lemon bush** (`LemonBushBlock`, `tools/lemons.py`): as decided, drawn from the rose bush's textures (citrus
   green; more leaves, white blossoms or the leaves' lemons where the roses were), untinted, with the rose bush's tags
   but flowers and bee food, no thorns. Bone meal on a bush hung with lemons gives a lemon sapling, as a rose bush gives
-  another of itself: otherwise a new world would have no sapling. The orchards are clumps of four tries within two
+  another of itself: otherwise a new world would have no sapling. (Using bone meal on it picks the lemons first, as using
+  anything does: the sapling takes a sneak, or a dispenser.) The orchards are clumps of four tries within two
   blocks of each spot their noise picks. The old tree feature keeps its id (`players-versus:lemon_bush`; Java key
   `LEMON_TREE`); the block is `players-versus:lemon_bush` too, in the block registry.
 - **Checks**: `SpawnRulesGameTest` (7), `EndermanShulkerGameTest` (+2), `LemonsGameTest` (+7), `PaleKinTest`,

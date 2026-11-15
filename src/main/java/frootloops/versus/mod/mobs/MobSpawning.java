@@ -29,6 +29,7 @@ import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.EntityGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -37,6 +38,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Set;
 
 public class MobSpawning {
 
@@ -116,6 +119,21 @@ public class MobSpawning {
 
     }
 
+    /** Zombies' and skeletons' kin: on natural ground as they are, the sky left to their own rules. */
+    private static final Set<EntityType<?>> UNDEAD_KIN = Set.of(EntityTypes.HUSK, EntityTypes.ZOMBIE_VILLAGER, EntityTypes.STRAY,
+            EntityTypes.BOGGED, EntityTypes.PARCHED, EntityTypes.FROSTBITE);
+
+    /**
+     * Whether the mod's rules (overworldRules) apply to a natural spawn of this type in this dimension: the overworld's
+     * zombies, skeletons, creepers and spiders, and the zombies' and skeletons' kin. The nether's and the end's keep
+     * vanilla's (the soul sand valleys' skeletons stand on soul sand).
+     */
+    public static boolean ruled(EntityType<?> type, ResourceKey<Level> dimension) {
+        if (dimension != Level.OVERWORLD) return false;
+        return type == EntityTypes.ZOMBIE || type == EntityTypes.SKELETON || type == EntityTypes.CREEPER || type == EntityTypes.SPIDER
+                || UNDEAD_KIN.contains(type);
+    }
+
     /** Spiders don't spawn naturally above this height: the mountains' heights. */
     public static final int SPIDERS_MAX_Y = 128;
 
@@ -132,6 +150,8 @@ public class MobSpawning {
         if (type == EntityTypes.CREEPER) return naturalGround && skyLight == 0;
         // In the dark as the others, the open sky included, but not on the mountains' heights nor below the pale line
         if (type == EntityTypes.SPIDER) return y >= PaleLine.Y && y <= SPIDERS_MAX_Y;
+        // Zombies' and skeletons' kin on natural ground too (husks, strays and parched want the sky by their own rules)
+        if (UNDEAD_KIN.contains(type)) return naturalGround;
         return true;
     }
 

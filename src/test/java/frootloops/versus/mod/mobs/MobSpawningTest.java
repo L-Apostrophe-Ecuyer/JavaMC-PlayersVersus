@@ -1,6 +1,10 @@
 package frootloops.versus.mod.mobs;
 
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.Level;
+
+import java.util.List;
 
 import frootloops.versus.mod.environment.worldgen.TestGame;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,7 +13,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Night, for the pale wolves' forest spawns: dusk to dawn, any day. */
+/**
+ * The monsters' natural spawn rules in the overworld (creepers under a roof, zombies, skeletons and their kin on natural
+ * ground, spiders back), and night, for the pale wolves' forest spawns: dusk to dawn, any day.
+ */
 class MobSpawningTest {
 
     @BeforeAll
@@ -75,5 +82,29 @@ class MobSpawningTest {
     void nightComesEveryDay() {
         assertTrue(MobSpawning.isNight(24000L * 7 + 18000L));
         assertFalse(MobSpawning.isNight(24000L * 7 + 6000L));
+    }
+
+    /** The rules are the overworld's: the nether's skeletons (on soul sand, in fortresses) and the end's keep vanilla's. */
+    @Test
+    void theRulesAreTheOverworldsOnly() {
+        assertTrue(MobSpawning.ruled(EntityTypes.SKELETON, Level.OVERWORLD), "the overworld's skeletons");
+        assertFalse(MobSpawning.ruled(EntityTypes.SKELETON, Level.NETHER), "the soul sand valleys' skeletons");
+        assertFalse(MobSpawning.ruled(EntityTypes.ZOMBIE, Level.END), "the end");
+        assertFalse(MobSpawning.ruled(EntityTypes.BLAZE, Level.OVERWORLD), "a monster the rules don't cover");
+    }
+
+    /**
+     * Zombies' and skeletons' kin (husks, zombie villagers, strays, bogged, parched, frostbites) spawn only on natural
+     * ground too; the sky is left to their own rules (husks, strays and parched want it).
+     */
+    @Test
+    void zombiesAndSkeletonsKinSpawnOnlyOnNaturalGround() {
+        for (EntityType<?> kin : List.of(EntityTypes.HUSK, EntityTypes.ZOMBIE_VILLAGER, EntityTypes.STRAY, EntityTypes.BOGGED,
+                EntityTypes.PARCHED, EntityTypes.FROSTBITE)) {
+            assertTrue(MobSpawning.ruled(kin, Level.OVERWORLD), kin + " isn't ruled");
+            assertFalse(MobSpawning.overworldRules(kin, false, 0, 30, false, false), kin + " on a floor someone built");
+            assertTrue(MobSpawning.overworldRules(kin, true, 15, 70, true, false), kin + " on natural ground under the sky");
+            assertTrue(MobSpawning.overworldRules(kin, true, 0, 30, false, true), kin + " on natural ground in a cave");
+        }
     }
 }

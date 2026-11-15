@@ -20,7 +20,7 @@ public class HostileEntityMixin {
     public static boolean checkMonsterSpawnRules(EntityType<? extends Monster> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL) return false;
         if(spawnReason != EntitySpawnReason.NATURAL) return Monster.checkMobSpawnRules(type, world, spawnReason, pos, random);
-        if (type == EntityTypes.ZOMBIE || type == EntityTypes.SKELETON || type == EntityTypes.CREEPER || type == EntityTypes.SPIDER) {
+        if (MobSpawning.ruled(type, world.getLevel().dimension())) {
             boolean natural = world.getBlockState(pos.below()).is(type == EntityTypes.CREEPER ? MobSpawning.CREEPER_SPAWNABLE : MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE);
             if (!MobSpawning.overworldRules(type, natural, world.getBrightness(LightLayer.SKY, pos), pos.getY(), world.canSeeSky(pos), MobSpawning.isMidnight(world))) return false;
         }
