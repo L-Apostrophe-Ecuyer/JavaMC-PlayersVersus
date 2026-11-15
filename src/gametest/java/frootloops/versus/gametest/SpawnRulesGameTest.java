@@ -2,6 +2,17 @@ package frootloops.versus.gametest;
 
 import frootloops.versus.mod.environment.PaleLine;
 import frootloops.versus.mod.mobs.ModEntities;
+import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
+import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.random.Weighted;
+import net.minecraft.world.attribute.EnvironmentAttributes;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.phys.Vec3;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -28,7 +39,8 @@ import java.util.Set;
 /**
  * The monsters' natural spawn rules, run where they should and shouldn't spawn, as the game's natural spawner runs them
  * (the placement's checks, then the mob's own): in a dark room of stone, on a built floor, in a corridor the sky's light
- * creeps into, and below the pale line, where a zombie, creeper or spider about to spawn is its pale kin.
+ * creeps into, and below the pale line, where a zombie, creeper or spider about to spawn is its pale kin. Watchlings:
+ * where they are listed, and never two within reach of each other.
  */
 @SuppressWarnings("removal")
 public class SpawnRulesGameTest {
@@ -187,6 +199,49 @@ public class SpawnRulesGameTest {
             Map<EntityType<?>, Integer> spawned = naturalSpawns(helper, middle, 400);
             helper.assertTrue(count(spawned, PALE_KINDS) > 0, "no zombies, creepers or spiders spawned above the pale line: " + spawned);
             helper.assertTrue(count(spawned, PALE_KIN) == 0, "pale kin spawned above the pale line: " + spawned);
+            helper.succeed();
+        });
+    }
+
+    /**
+     * Watchlings now and then: every pale biome lists them at 15 (the Pale Garden, the pale taiga, the pale swamp), the
+     * caves at 12 (the deep caves, the pale grotto and hollow, the regular cave).
+     */
+    @GameTest(structure = GROVE, maxTicks = 20)
+    public void watchlingsAreListedInThePaleBiomesAndTheCaves(GameTestHelper helper) {
+        Registry<Biome> biomes = helper.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
+        Map<ResourceKey<Biome>, Integer> weights = Map.of(Biomes.PALE_GARDEN, 15, CustomOverworldBiomes.PALE_TAIGA, 15,
+                CustomOverworldBiomes.PALE_SWAMP, 15, CustomOverworldBiomes.DEEP_CAVES, 12, CustomOverworldBiomes.PALE_GROTTO, 12,
+                CustomOverworldBiomes.PALE_HOLLOW, 12,
+                CustomOverworldBiomes.REGULAR_CAVE, 12);
+        weights.forEach((key, weight) -> {
+            int listed = biomes.getValueOrThrow(key).getAttributes().applyModifier(EnvironmentAttributes.NATURAL_MOB_SPAWNS, MobSpawnSettings.EMPTY)
+                    .getMobsToSpawn(MobCategory.MONSTER).unwrap().stream()
+                    .filter(entry -> entry.value().type() == ModEntities.WATCHLING).mapToInt(Weighted::weight).sum();
+            helper.assertTrue(listed == weight, key.identifier() + " lists watchlings at " + listed + ", not " + weight);
+        });
+        helper.succeed();
+    }
+
+    /**
+     * In a closed dark room below the pale line a watchling may spawn, unless another is within 128 blocks (a watchling
+     * haunts one player at a time). (Another test's watchling may be about: then none may spawn here either.) The room is
+     * four blocks high: a watchling stands over three.
+     */
+    @GameTest(structure = GROVE, maxTicks = 100, skyAccess = true)
+    public void noWatchlingSpawnsWithinReachOfAnother(GameTestHelper helper) {
+        BlockPos middle = room(helper, new BlockPos(10, PaleLine.Y - 8 - helper.absolutePos(BlockPos.ZERO).getY(), 10), 15, 4, Blocks.DEEPSLATE, Blocks.DEEPSLATE);
+        helper.runAfterDelay(20, () -> {
+            ServerLevel level = helper.getLevel();
+            Vec3 at = Vec3.atBottomCenterOf(middle);
+            boolean alone = level.getEntitiesOfClass(WatchlingEntity.class, new AABB(middle).inflate(128), watchling -> watchling.distanceToSqr(at) < 128 * 128).isEmpty();
+            int times = times(level, ModEntities.WATCHLING, middle);
+            helper.assertTrue(alone ? times > 0 : times == 0, alone ? "a watchling never may spawn in the dark below the pale line" : "a watchling may spawn with another about");
+            WatchlingEntity other = helper.spawnWithNoFreeWill(ModEntities.WATCHLING, new Vec3(24.5, 2.0, 40.5));
+            int near = times(level, ModEntities.WATCHLING, middle);
+            int distance = (int) Math.sqrt(other.distanceToSqr(at));
+            other.discard();
+            helper.assertTrue(near == 0, "a watchling may spawn with another " + distance + " blocks away");
             helper.succeed();
         });
     }

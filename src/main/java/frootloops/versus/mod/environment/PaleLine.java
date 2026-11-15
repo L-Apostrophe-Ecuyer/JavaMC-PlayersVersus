@@ -9,8 +9,8 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
 
 /**
- * Where paleness holds: below y 0 (the deepslate), and in the pale biomes (the pale garden, the pale grotto and hollow,
- * the deep caves: tag {@code players-versus:pale}). Mushrooms there grow pale, pale mobs spawn there at any hour (above
+ * Where paleness holds: below y 0 (the deepslate), and in the pale biomes (the pale garden, taiga and swamp, the pale
+ * grotto and hollow, the deep caves: tag {@code players-versus:pale}). Mushrooms there grow pale, pale mobs spawn there at any hour (above
  * it, only at midnight under a new moon), and whatever turns undead there rises pale.
  */
 public final class PaleLine {

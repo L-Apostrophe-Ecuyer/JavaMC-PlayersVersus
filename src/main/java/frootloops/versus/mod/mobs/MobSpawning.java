@@ -28,12 +28,15 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.EntityGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class MobSpawning {
 
@@ -85,9 +88,13 @@ public class MobSpawning {
                 MobCategory.MONSTER, ModEntities.PALE_WOLF, 8, 2, 4);
         SpawnPlacements.register(ModEntities.PALE_WOLF, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleWolf);
 
-        // Watchlings: rarely, where paleness holds, in the dark (canSpawnWatchling)
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.WATCHLING, 4, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.PALE_GROTTO, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.WATCHLING, 3, 1, 1);
+        // Watchlings: now and then, where paleness holds, in the dark (canSpawnWatchling), never within WATCHLINGS_APART
+        // blocks of another: in every pale biome on the surface (the Pale Garden, the pale taiga, the pale swamp), and in
+        // the caves (the pale ones and the regular cave)
+        BiomeModifications.addSpawn(BiomeSelectors.tag(PaleLine.PALE_BIOMES).and(BiomeSelectors.excludeByKey(CustomOverworldBiomes.DEEP_CAVES,
+                CustomOverworldBiomes.PALE_GROTTO, CustomOverworldBiomes.PALE_HOLLOW)), MobCategory.MONSTER, ModEntities.WATCHLING, 15, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.PALE_GROTTO,
+                CustomOverworldBiomes.PALE_HOLLOW, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.WATCHLING, 12, 1, 1);
         SpawnPlacements.register(ModEntities.WATCHLING, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWatchling);
 
         // Mushroom caves: their creepers and spiders, by the biome's file
@@ -186,11 +193,24 @@ public class MobSpawning {
                 && world.getBlockState(blockPos.below()).is(BlockTags.WOLVES_SPAWNABLE_ON);
     }
 
-    /** A monster's spawn (in the dark), by the pale line, in total darkness off the pale biomes. */
+    /** No watchling spawns naturally within this many blocks of another: a watchling haunts one player at a time. */
+    public static final int WATCHLINGS_APART = 128;
+
+    /**
+     * A monster's spawn (in the dark), by the pale line, in total darkness off the pale biomes, and not within
+     * {@link #WATCHLINGS_APART} blocks of another watchling.
+     */
     public static boolean canSpawnWatchling(EntityType<WatchlingEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
         if (!Monster.checkMonsterSpawnRules(type, world, spawnReason, blockPos, random)) return false;
         if (spawnReason != EntitySpawnReason.NATURAL) return true;
-        return palePlace(world, blockPos, 0);
+        return palePlace(world, blockPos, 0) && !watchlingNear(world, blockPos);
+    }
+
+    /** Whether a watchling is within {@link #WATCHLINGS_APART} blocks of the place. */
+    static boolean watchlingNear(EntityGetter world, BlockPos blockPos) {
+        Vec3 at = Vec3.atBottomCenterOf(blockPos);
+        return !world.getEntitiesOfClass(WatchlingEntity.class, new AABB(blockPos).inflate(WATCHLINGS_APART),
+                watchling -> watchling.distanceToSqr(at) < (double) WATCHLINGS_APART * WATCHLINGS_APART).isEmpty();
     }
 
     public static boolean canSpawnPaleZombie(EntityType<PaleZombieEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
