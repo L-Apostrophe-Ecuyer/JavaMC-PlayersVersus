@@ -48,3 +48,24 @@ Asked (2026-11-15), with a reference picture of a "Medium Cypress Tree":
   above, a spire on top, nothing beyond two blocks from the trunk) of both leaves (cypress ones more up high).
 - Data: the bush's models and blockstates (trunk below, crowns above, every stage).
 - The gallery: a cypress and lemon bushes up close, looked at.
+
+## As built
+
+- **Lemons** (`Fruits`, `VersusSettings.Lemons`): as decided; the Sour view widens in 2 ticks, holds about a second and
+  eases back over its last 60 ticks.
+- **Cypress leaves** (`tools/cypress.py`, `CustomBlocks.CYPRESS_LEAVES`): vanilla's `LeavesBlock` as spruce's, untinted
+  through a `cube_all` model as azalea's leaves are, each pixel of spruce leaves taking azalea's green of the same rank of
+  brightness; alive by spruce logs (`LeafReach`); spruce leaves' loot.
+- **The cypress** (`CypressFoliagePlacer`, registered as `players-versus:cypress_foliage_placer` in `CustomWorldgen`):
+  rows down the trunk from its top to a block or two above the ground, by height in the crown (0 its foot, 1 its top
+  row): a plus below 0.1, the square with fuzz (a leaf one block out from a side, 35%) to 0.45, the square with its
+  corners kept 60% and 10% fuzz to 0.75, a plus above, then a spire of two or three single leaves over the trunk.
+  Highlights 15% + 55% of the height (20% more on fuzz, 90% on the spire).
+- **The lemon bush** (`tools/lemons.py`): the lower half an oak stem two pixels wide, flared to three at its foot; the
+  upper half four boxes of `lemon_bush_leaves` (oak leaves in a fixed citrus green): a 12-pixel box reaching three pixels
+  down over the stem, a 16-pixel band each way round its middle and a cap, the blossoms' or lemons' overlay on copies of
+  the boxes 0.05 pixel larger. The item is a tiny tree. The gallery's scene is `tools/gallery-cypress-lemons.txt`.
+- **Checks**: `LemonsGameTest.aLemonIsALittleFoodAndAQuickSour`, `TuscanGroveGameTest.cypressLeavesAreSpruceLeavesInLighterColours`
+  and `aCypressIsAFuzzyPear` (24 seeds), `LemonBushModelsTest` (2); each watched failing first. The gallery looked at:
+  the cypresses and the three stages of bush up close, and the Tuscan grove.
+

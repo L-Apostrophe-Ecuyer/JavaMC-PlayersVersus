@@ -1,0 +1,17 @@
+# The cypress and the lemon bush up close on a lit platform in the sky (a first view loads the place), then the Tuscan grove
+name:cypress_load
+at:1010,1030,180,0,2
+cmd:fill 990 199 990 1030 199 1034 minecraft:grass_block
+cmd:place feature players-versus:cypress 1010 200 1004
+cmd:place feature players-versus:cypress 1001 200 1013
+cmd:setblock 1008 200 1024 players-versus:lemon_bush[half=lower,fruit=0]
+cmd:setblock 1008 201 1024 players-versus:lemon_bush[half=upper,fruit=0]
+cmd:setblock 1010 200 1025 players-versus:lemon_bush[half=lower,fruit=1]
+cmd:setblock 1010 201 1025 players-versus:lemon_bush[half=upper,fruit=1]
+cmd:setblock 1012 200 1024 players-versus:lemon_bush[half=lower,fruit=2]
+cmd:setblock 1012 201 1024 players-versus:lemon_bush[half=upper,fruit=2]
+name:cypress_up_close
+at:1010,1030,180,-12,2
+name:lemon_bushes_up_close
+at:1010,1029,180,15,1
+biome:players-versus:tuscan_grove
