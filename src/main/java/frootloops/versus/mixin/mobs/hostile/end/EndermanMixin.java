@@ -89,6 +89,17 @@ public abstract class EndermanMixin extends Monster implements NeutralMob {
         return super.getPassengerAttachmentPoint(passenger, dimensions, scale);
     }
 
+    /**
+     * Despawning, it takes the shulker it carries with it: shulkers don't despawn, and one left behind would stay where no
+     * enderman brought it. Only a despawn does: killed, it drops the shulker; unloaded, the two are saved together.
+     */
+    @Override
+    public void checkDespawn() {
+        Shulker shulker = EndermanShulkerCarrier.carried(this);
+        super.checkDespawn();
+        if (shulker != null && this.isRemoved()) shulker.discard();
+    }
+
     /** The enderman goes where it means to: a shulker in its arms doesn't steer it. */
     @Nullable
     @Override

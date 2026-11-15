@@ -6,7 +6,10 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enderman;
@@ -19,6 +22,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Now and then an enderman carries a shulker in its arms (EndermanShulkerCarrier): it holds it at its chest, inside its
  * widened box, and goes where it means to; the shulker can't teleport out of its arms, and its bullets pass through it.
+ * Despawning, it takes the shulker with it; killed, it drops it.
  */
 public class EndermanShulkerGameTest {
     private static final String ROOM = "players-versus-gametest:leaves_room"; // 14 x 8 x 8
@@ -93,6 +97,52 @@ public class EndermanShulkerGameTest {
             helper.assertTrue(!enderman.hasEffect(MobEffects.LEVITATION) && enderman.getHealth() == enderman.getMaxHealth()
                     && enderman.position().distanceTo(standing) < 0.01, "its shulker's bullet hit the enderman");
             helper.assertTrue(pig.hasEffect(MobEffects.LEVITATION), "the bullet hasn't reached the pig beyond yet");
+        });
+    }
+
+    /**
+     * An enderman carrying a shulker that despawns (no player within reach, nothing it must keep) takes the shulker with
+     * it: shulkers don't despawn, and one left behind would stay. They are set up high over the test, out of every
+     * player's reach (the tests' players stand low), a player by the test so that despawning is weighed at all.
+     */
+    @GameTest(structure = ROOM, maxTicks = 20)
+    public void aCarriedShulkerDespawnsWithItsEnderman(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        Vec3 by = helper.absoluteVec(new Vec3(6.5, 1.0, 3.5));
+        player.snapTo(by.x, by.y, by.z, 0.0F, 0.0F);
+        Vec3 high = by.add(0.0, 240.0, 0.0);
+        // Made as the natural spawner makes them, not kept as the helper's are
+        Enderman enderman = EntityTypes.ENDERMAN.create(level, EntitySpawnReason.NATURAL);
+        Shulker shulker = EntityTypes.SHULKER.create(level, EntitySpawnReason.JOCKEY);
+        helper.assertTrue(enderman != null && shulker != null, "no enderman or shulker made");
+        enderman.snapTo(high.x, high.y, high.z, 0.0F, 0.0F);
+        shulker.snapTo(high.x, high.y, high.z, 0.0F, 0.0F);
+        level.addFreshEntity(enderman);
+        level.addFreshEntity(shulker);
+        helper.assertTrue(shulker.startRiding(enderman, true, false), "the shulker didn't go into its arms");
+        enderman.checkDespawn();
+        boolean despawned = enderman.isRemoved();
+        boolean taken = shulker.isRemoved();
+        enderman.discard();
+        shulker.discard();
+        level.getServer().getPlayerList().remove(player);
+        helper.assertTrue(despawned, "the enderman didn't despawn");
+        helper.assertTrue(taken, "the shulker stayed behind");
+        helper.succeed();
+    }
+
+    /** Killed, the enderman drops its shulker, alive. */
+    @GameTest(structure = ROOM, maxTicks = 60)
+    public void aKilledEndermanDropsItsShulker(GameTestHelper helper) {
+        floor(helper);
+        Vec3 at = new Vec3(6.5, 1.0, 3.5);
+        Enderman enderman = helper.spawnWithNoFreeWill(EntityTypes.ENDERMAN, at);
+        Shulker shulker = carried(helper, enderman, at);
+        enderman.kill(helper.getLevel());
+        helper.succeedWhen(() -> {
+            helper.assertTrue(enderman.isRemoved(), "the enderman isn't gone yet");
+            helper.assertTrue(shulker.isAlive() && !shulker.isPassenger(), "the shulker didn't stay behind, alive, when its enderman was killed");
         });
     }
 }

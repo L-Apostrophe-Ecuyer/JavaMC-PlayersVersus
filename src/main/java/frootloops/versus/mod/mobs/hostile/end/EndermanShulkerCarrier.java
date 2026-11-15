@@ -17,7 +17,8 @@ import org.jetbrains.annotations.Nullable;
  * and teleports with it (EndermanMixin keeps the shulker from steering it, and widens it so the shulker is always inside
  * its box: wherever the enderman fits, the shulker isn't in a wall), and carries no block while it has it. The shulker
  * can't teleport out of its arms (ShulkerMixin) and shoots on its own, its bullets passing through the one carrying it
- * (ShulkerBulletMixin). Killed, the enderman drops it.
+ * (ShulkerBulletMixin). Killed, the enderman drops it; despawning, it takes it along (EndermanMixin), since shulkers
+ * don't despawn.
  */
 public final class EndermanShulkerCarrier {
     private EndermanShulkerCarrier() {}
