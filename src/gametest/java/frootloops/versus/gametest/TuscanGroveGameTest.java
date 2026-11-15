@@ -48,24 +48,36 @@ public class TuscanGroveGameTest {
         }
     }
 
+    /**
+     * A cypress is a fuzzy pear on a spruce trunk, as the owner's picture: its crown wider below than above, a spire of
+     * single leaves over the trunk's top, no leaf more than two blocks from the trunk (but some two blocks out: fuzz), of
+     * spruce leaves with cypress leaves for highlights, more of them up high.
+     */
     @GameTest(structure = GROVE, maxTicks = 40, skyAccess = true)
-    public void aCypressIsANarrowColumn(GameTestHelper helper) {
+    public void aCypressIsAFuzzyPear(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         Feature cypress = level.registryAccess().lookupOrThrow(Registries.FEATURE).getValue(Identifier.parse("players-versus:cypress"));
         helper.assertTrue(cypress != null, "players-versus:cypress is not a feature");
         BlockPos origin = helper.absolutePos(new BlockPos(24, 1, 24));
+        int fuzzy = 0;
         for (int seed = 0; seed < SEEDS; seed++) {
             clear(helper);
             helper.assertTrue(cypress.place(level, level.getChunkSource().getGenerator(), RandomSource.create(seed), origin), "the cypress didn't grow with seed " + seed);
-            int leaves = 0, trunk = 0, widest = 0, top = 0;
+            int[] perRow = new int[HEIGHT], highlights = new int[HEIGHT];
+            int trunk = 0, widest = 0, outermost = 0, bottom = HEIGHT, top = 0;
             for (int x = FROM; x <= TO; x++) {
                 for (int z = FROM; z <= TO; z++) {
                     for (int y = 1; y < HEIGHT; y++) {
                         BlockPos rel = new BlockPos(x, y, z);
                         BlockState state = helper.getBlockState(rel);
                         if (state.is(BlockTags.LEAVES)) {
-                            leaves++;
-                            widest = Math.max(widest, Math.max(Math.abs(x - 24), Math.abs(z - 24)));
+                            helper.assertTrue(state.is(Blocks.SPRUCE_LEAVES) || state.is(CustomBlocks.CYPRESS_LEAVES), "seed " + seed + ": " + state + " in a cypress");
+                            perRow[y]++;
+                            if (state.is(CustomBlocks.CYPRESS_LEAVES)) highlights[y]++;
+                            int away = Math.max(Math.abs(x - 24), Math.abs(z - 24));
+                            widest = Math.max(widest, away);
+                            if (away == 2) outermost++;
+                            bottom = Math.min(bottom, y);
                             top = Math.max(top, y);
                         } else if (state.getBlock() instanceof TreeBlock) {
                             trunk++;
@@ -74,12 +86,25 @@ public class TuscanGroveGameTest {
                     }
                 }
             }
-            // A column three blocks across (the leaves' plus), from near the ground to over the trunk's top: tall and not a bare pole
-            helper.assertTrue(widest == 1, "seed " + seed + ": leaves " + widest + " blocks from the trunk, not 1");
             helper.assertTrue(trunk >= 12, "seed " + seed + ": a trunk of only " + trunk + " blocks");
-            helper.assertTrue(top >= trunk, "seed " + seed + ": the crown's top, " + top + ", is under the trunk's");
-            helper.assertTrue(leaves >= 30, "seed " + seed + ": only " + leaves + " leaves");
+            helper.assertTrue(widest <= 2, "seed " + seed + ": leaves " + widest + " blocks from the trunk");
+            if (outermost > 0) fuzzy++;
+            // A spire: the top two rows single leaves over the trunk, the crown's top over the trunk's
+            helper.assertTrue(top > trunk && perRow[top] == 1 && perRow[top - 1] == 1 && helper.getBlockState(new BlockPos(24, top, 24)).is(BlockTags.LEAVES),
+                    "seed " + seed + ": no spire of single leaves on top (rows " + perRow[top - 1] + ", " + perRow[top] + ")");
+            // A pear: more leaves a row in the crown's lower half than in its upper half
+            int middle = (bottom + top) / 2, lower = 0, lowerRows = 0, upper = 0, upperRows = 0, lowerLight = 0, upperLight = 0;
+            for (int y = bottom; y <= top; y++) {
+                if (y <= middle) { lower += perRow[y]; lowerRows++; lowerLight += highlights[y]; }
+                else { upper += perRow[y]; upperRows++; upperLight += highlights[y]; }
+            }
+            helper.assertTrue((double) lower / lowerRows > 1.3 * upper / upperRows,
+                    "seed " + seed + ": " + lower + " leaves in the lower half's " + lowerRows + " rows against " + upper + " in the upper half's " + upperRows + ": no pear");
+            helper.assertTrue(lowerLight + upperLight > 0 && lowerLight + upperLight < lower + upper, "seed " + seed + ": not a mix of spruce and cypress leaves");
+            helper.assertTrue((double) upperLight / upper > (double) lowerLight / lower,
+                    "seed " + seed + ": cypress leaves " + upperLight + " of " + upper + " up high, " + lowerLight + " of " + lower + " below");
         }
+        helper.assertTrue(fuzzy >= SEEDS / 2, "only " + fuzzy + " of " + SEEDS + " cypresses have a leaf sticking out two blocks");
         clear(helper);
         helper.succeed();
     }

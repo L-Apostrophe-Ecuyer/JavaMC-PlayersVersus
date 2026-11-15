@@ -1,5 +1,7 @@
 package frootloops.versus.mod.environment.worldgen;
 
+import frootloops.versus.mod.environment.worldgen.features.CypressFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
 import frootloops.versus.VersusMod;
 import frootloops.versus.mod.environment.worldgen.features.MudPatchFeature;
 import frootloops.versus.mod.environment.worldgen.features.MushroomRingFeature;
@@ -53,6 +55,10 @@ public class CustomWorldgen {
     public static final Identifier ROCK_GROUND_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock_ground");
     /** The Players Versus world type only (PvWorldFilter): a placement filter for what the mod adds to vanilla's biomes. */
     public static final Identifier PV_WORLD_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "players_versus_world");
+    /** The cypress's crown (CypressFoliagePlacer): a fuzzy pear of spruce leaves with cypress leaves for highlights. */
+    public static final Identifier CYPRESS_FOLIAGE_PLACER_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "cypress_foliage_placer");
+    public static final FoliagePlacerType<CypressFoliagePlacer> CYPRESS_FOLIAGE_PLACER =
+            Registry.register(BuiltInRegistries.FOLIAGE_PLACER_TYPE, CYPRESS_FOLIAGE_PLACER_ID, new FoliagePlacerType<>(CypressFoliagePlacer.CODEC));
     public static final StructureType<RockFormationStructure> ROCK_FORMATION =
             Registry.register(BuiltInRegistries.STRUCTURE_TYPE, ROCK_FORMATION_ID, () -> RockFormationStructure.CODEC);
     public static final StructurePieceType ROCK_FORMATION_PIECE =

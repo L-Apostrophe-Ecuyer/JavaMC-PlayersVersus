@@ -308,16 +308,18 @@ BIOMES.update({
 })
 
 
-# A cypress: a tall, narrow column of spruce leaves (a plus, three blocks across, tapering at its top) on a straight trunk of
-# twelve or thirteen blocks, bare for one or two blocks at its foot. The spruce's foliage placer, not the pine's: the pine's adds
-# a random radius (the trunk's bare length), which makes most of its trees cones as wide as spruces.
+# A cypress: a fuzzy pear of spruce leaves on a straight spruce trunk of twelve or thirteen blocks, bare for a block or two at
+# its foot, with cypress leaves (spruce leaves in azalea's colours, tools/cypress.py) for highlights, more of them up high,
+# and a spire of single leaves over the trunk's top: the mod's foliage placer (CypressFoliagePlacer) shapes it, as the
+# owner's picture of a "Medium Cypress Tree"
+LEAVES = {"distance": "7", "persistent": "false", "waterlogged": "false"}
 CYPRESS = {
     "type": "minecraft:tree",
     "below_trunk_provider": "minecraft:soil_beneath_tree",
     "decorators": [],
-    "foliage_placer": {"type": "minecraft:spruce_foliage_placer", "offset": 1, "radius": 1,
-                       "trunk_height": {"type": "minecraft:uniform", "min_inclusive": 1, "max_inclusive": 2}},
-    "foliage_provider": {"id": "minecraft:spruce_leaves", "properties": {"distance": "7", "persistent": "false", "waterlogged": "false"}},
+    "foliage_placer": {"type": f"{MOD}:cypress_foliage_placer", "radius": 1, "offset": 0,
+                       "highlight_provider": {"id": f"{MOD}:cypress_leaves", "properties": LEAVES}},
+    "foliage_provider": {"id": "minecraft:spruce_leaves", "properties": LEAVES},
     "ignore_vines": True,
     "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 1, "upper_size": 1},
     "trunk_placer": {"type": "minecraft:straight_trunk_placer", "base_height": 12, "height_rand_a": 1, "height_rand_b": 0},
