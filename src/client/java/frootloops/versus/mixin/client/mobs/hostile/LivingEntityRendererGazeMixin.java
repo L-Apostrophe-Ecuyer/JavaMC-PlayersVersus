@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Draws the warped and phantoms as opaque as the camera sees them (GazeTranslucency): a see-through body, from a
- * shimmer to whole, their shadows fading with them. (Their eyes fade in EyesLayerGazeMixin.)
+ * shimmer to whole, their shadows fading with them. (Their eyes and what they carry are drawn whole.)
  */
 @Environment(EnvType.CLIENT)
 @Mixin(LivingEntityRenderer.class)
