@@ -40,6 +40,7 @@ public class MobSpawning {
     public static final int MOB_CAP_MONSTERS = 36;
     public static final int MOB_CAP_AMBIENT = 4;
 
+    /** Natural ground (natural_ground): the overworld's stones, dirts, sands, gravel, terracotta, snow, ice, clay... and the mod's muds and clays. */
     public static final TagKey<Block> UNDEAD_OVERWORLD_SPAWNABLE = blockTagOf("undead_overworld_spawnable_on");
     public static final TagKey<Block> CREEPER_SPAWNABLE = blockTagOf("creeper_spawnable_on");
     public static final TagKey<Block> PALE_MOBS_SPAWNABLE = blockTagOf("pale_mobs_spawnable_on");
@@ -106,6 +107,25 @@ public class MobSpawning {
         // Nether:
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.NETHER_WASTES), MobCategory.MONSTER, EntityTypes.BLAZE, 15, 1, 1);
 
+    }
+
+    /** Spiders don't spawn naturally above this height: the mountains' heights. */
+    public static final int SPIDERS_MAX_Y = 128;
+
+    /**
+     * The mod's rules for a natural spawn of a vanilla monster, on top of the darkness the game asks of them all: what it
+     * stands on (natural ground, by its tag), the sky's light where it stands and whether it sees the sky, its height, the
+     * hour. True for the monsters these rules don't cover.
+     */
+    public static boolean overworldRules(EntityType<?> type, boolean naturalGround, int skyLight, int y, boolean seesSky, boolean midnight) {
+        // On natural ground only, at every hour; not below the pale line, where their pale kin spawn (PaleKin); midnight
+        // lifts only the rule against the open sky up high
+        if (type == EntityTypes.ZOMBIE || type == EntityTypes.SKELETON) return naturalGround && y >= PaleLine.Y && (midnight || !(y > 64 && seesSky));
+        // Only where the sky's light doesn't reach: caves, overhangs, under cover
+        if (type == EntityTypes.CREEPER) return naturalGround && skyLight == 0;
+        // In the dark as the others, the open sky included, but not on the mountains' heights nor below the pale line
+        if (type == EntityTypes.SPIDER) return y >= PaleLine.Y && y <= SPIDERS_MAX_Y;
+        return true;
     }
 
     public static boolean isMidnightDuringNewMoon(LevelAccessor world) {

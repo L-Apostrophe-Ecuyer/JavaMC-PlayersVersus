@@ -12,7 +12,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -31,8 +30,6 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.skeleton.Skeleton;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WebBlock;
@@ -79,19 +76,6 @@ public class SpiderMixin extends Monster implements SurfaceCrawler {
     @Override
     public float getVoicePitch() {
         return this.isBaby() ? (this.random.nextFloat() - this.random.nextFloat()) * 0.3F + 1.5F : (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.6F;
-    }
-
-    @Override
-    public boolean checkSpawnRules(LevelAccessor world, EntitySpawnReason spawnReason) {
-        if(spawnReason != EntitySpawnReason.NATURAL) return super.checkSpawnRules(world, spawnReason);
-
-        int y = this.blockPosition().getY();
-        if(y < -8) return false;
-
-        int ySpawnBonus = world.getBiome(this.blockPosition()).is(BiomeTags.SPAWNS_WARM_VARIANT_FROGS) ? 32 : 0;
-        if(y > 96 + ySpawnBonus) return false;
-        if(y > 64 + ySpawnBonus && world.getBrightness(LightLayer.SKY, this.blockPosition()) > 2) return false;
-        return super.checkSpawnRules(world, spawnReason);
     }
 
     @Override

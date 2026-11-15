@@ -90,6 +90,7 @@
     "items_and_effects.PotionBottleUsageMixin",
 
     "mobs.MobSpawnGroupsMixin",
+    "mobs.NaturalSpawnerPaleKinMixin",
     "mobs.hostile.HostileEntityMixin",
     "mobs.LandPathfindingMixin",
 

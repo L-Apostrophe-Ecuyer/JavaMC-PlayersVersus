@@ -1,8 +1,7 @@
 {
+  "replace": false,
   "values": [
-    "minecraft:deepslate",
-    "minecraft:tuff",
-    "minecraft:pale_moss_block",
+    "#players-versus:natural_ground",
     "minecraft:pale_moss_carpet"
   ]
 }

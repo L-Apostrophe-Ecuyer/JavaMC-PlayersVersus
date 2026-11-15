@@ -20,11 +20,9 @@ public class HostileEntityMixin {
     public static boolean checkMonsterSpawnRules(EntityType<? extends Monster> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL) return false;
         if(spawnReason != EntitySpawnReason.NATURAL) return Monster.checkMobSpawnRules(type, world, spawnReason, pos, random);
-        if(!MobSpawning.isMidnight(world)) {
-            if ((type == EntityTypes.ZOMBIE || type == EntityTypes.SKELETON) && (pos.getY() < 0 || !world.getBlockState(pos.below()).is(MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE) || (pos.getY() > 64 && world.canSeeSky(pos))))
-                return false;
-            else if (!MobSpawning.isNewMoon(world) && type == EntityTypes.CREEPER && (pos.getY() > 128 || world.getBrightness(LightLayer.SKY, pos) > 7 || !world.getBlockState(pos.below()).is(MobSpawning.CREEPER_SPAWNABLE)))
-                return false;
+        if (type == EntityTypes.ZOMBIE || type == EntityTypes.SKELETON || type == EntityTypes.CREEPER || type == EntityTypes.SPIDER) {
+            boolean natural = world.getBlockState(pos.below()).is(type == EntityTypes.CREEPER ? MobSpawning.CREEPER_SPAWNABLE : MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE);
+            if (!MobSpawning.overworldRules(type, natural, world.getBrightness(LightLayer.SKY, pos), pos.getY(), world.canSeeSky(pos), MobSpawning.isMidnight(world))) return false;
         }
         return (Monster.isDarkEnoughToSpawn(world, pos, random)) && Monster.checkMobSpawnRules(type, world, spawnReason, pos, random);
     }

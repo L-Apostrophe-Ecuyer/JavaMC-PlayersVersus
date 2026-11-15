@@ -1,9 +1,7 @@
 {
+  "replace": false,
   "values": [
-    "#minecraft:foxes_spawnable_on",
-    "minecraft:sand",
-    "minecraft:stone",
-    "minecraft:deepslate",
+    "#players-versus:natural_ground",
     "#minecraft:base_stone_nether"
   ]
 }
