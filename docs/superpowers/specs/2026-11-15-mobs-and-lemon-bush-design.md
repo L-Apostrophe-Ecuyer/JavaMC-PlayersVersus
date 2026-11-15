@@ -67,3 +67,31 @@ Asked (2026-11-15), alongside finishing the refinement pass:
   an enderman's despawn takes its shulker; the lemon bush grows, fruits and is picked.
 - Unit tests where the logic is plain (the pale kin of a spawn, by height).
 - The client: the gallery shows an enderman with its block at the edge of the view, its eyes and block whole.
+
+## As built
+
+- **Spawn rules** (`MobSpawning.overworldRules`, read by `HostileEntityMixin` for natural spawns): as decided. One tag,
+  `natural_ground`, feeds the undead's, the creepers' and the pale mobs' spawn tags. The spiders' fate was their own
+  rule (`SpiderMixin`): no spider above y 64 wherever the sky's light was over 2 (most of the land) nor below y -8; they
+  now spawn in the dark from the pale line to y 128, open sky included.
+- **The pale kin** (`PaleKin`, `NaturalSpawnerPaleKinMixin`): the spawner keeps the biome's entry it picked (it checks
+  the biome still lists it) and reads its kind as the pale kin, for the place's checks, the spawn's cost and the mob it
+  makes. Zombies, husks and zombie villagers become pale zombies; creepers pale creepers; spiders and cave spiders pale
+  spiders; drowned stay drowned (water); skeletons below the pale line stay refused; the overworld only.
+- **Watchlings**: 15 in the pale tag's surface biomes, 12 in the deep caves, the pale grotto and hollow and the regular
+  cave; none within 128 blocks of another (by distance, whatever it's doing). A watchling stands 3.1 blocks tall, so it
+  spawns only where four blocks are clear.
+- **Carried shulkers**: the enderman's `checkDespawn` takes its shulker when it despawns; a kill or an unload doesn't.
+- **Eyes and carried blocks**: `EyesLayerGazeMixin` and `CarriedBlockLayerGazeMixin` are gone; the gallery's scene for
+  it is `tools/gallery-gaze.txt`.
+- **The lemon bush** (`LemonBushBlock`, `tools/lemons.py`): as decided, drawn from the rose bush's textures (citrus
+  green; more leaves, white blossoms or the leaves' lemons where the roses were), untinted, with the rose bush's tags
+  but flowers and bee food, no thorns. Bone meal on a bush hung with lemons gives a lemon sapling, as a rose bush gives
+  another of itself: otherwise a new world would have no sapling. The orchards are clumps of four tries within two
+  blocks of each spot their noise picks. The old tree feature keeps its id (`players-versus:lemon_bush`; Java key
+  `LEMON_TREE`); the block is `players-versus:lemon_bush` too, in the block registry.
+- **Checks**: `SpawnRulesGameTest` (7), `EndermanShulkerGameTest` (+2), `LemonsGameTest` (+7), `PaleKinTest`,
+  `MobSpawningTest` (+4), `BiomeDataTest` (+1). The new behaviour's tests were watched failing first (the rules' unit
+  tests, the pale kin, the watchlings, the despawn, the bush); the built rooms' rule checks and the killed enderman's
+  drop are guards that passed from the start.
+
