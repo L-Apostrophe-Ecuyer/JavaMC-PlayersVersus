@@ -48,6 +48,8 @@ public class CustomWorldgen {
     public static final Identifier STONE_STALAGTITE_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "stone_stalagtite");
     public static final Identifier MUD_PATCH_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "mud_patch");
     public static final Identifier MUSHROOM_RING_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "mushroom_ring");
+    /** Geysers on a pool's floor (PoolGeysersFeature): the sulfur pools' potent sulfur over magma. */
+    public static final Identifier POOL_GEYSERS_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "pool_geysers");
     /** Small rocks (RockFeature), and large ones on the world's grid (RockFormationStructure, one piece a body). */
     public static final Identifier ROCK_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock");
     public static final Identifier ROCK_FORMATION_ID = Identifier.fromNamespaceAndPath(VersusMod.MOD_ID, "rock_formation");
@@ -87,6 +89,7 @@ public class CustomWorldgen {
         Registry.register(BuiltInRegistries.FEATURE_TYPE, STONE_STALAGTITE_ID, StoneStalagtiteFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MUD_PATCH_ID, MudPatchFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MUSHROOM_RING_ID, MushroomRingFeature.CODEC);
+        Registry.register(BuiltInRegistries.FEATURE_TYPE, POOL_GEYSERS_ID, frootloops.versus.mod.environment.worldgen.features.PoolGeysersFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, MARSH_ID, frootloops.versus.mod.environment.worldgen.features.MarshFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, ROCK_ID, RockFeature.CODEC);
         Registry.register(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, ROCK_GROUND_ID, RockGroundFilter.CODEC);

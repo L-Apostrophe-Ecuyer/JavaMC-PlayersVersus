@@ -24,7 +24,8 @@
       "frootloops.versus.gametest.WetlandsGameTest",
       "frootloops.versus.gametest.TuscanGroveGameTest",
       "frootloops.versus.gametest.RiverbanksGameTest",
-      "frootloops.versus.gametest.SpawnRulesGameTest"
+      "frootloops.versus.gametest.SpawnRulesGameTest",
+      "frootloops.versus.gametest.SulfurGameTest"
     ],
     "fabric-client-gametest": [
       "frootloops.versus.gametest.client.WorldgenGallery"

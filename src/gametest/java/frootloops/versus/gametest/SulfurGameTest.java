@@ -1,0 +1,74 @@
+package frootloops.versus.gametest;
+
+import frootloops.versus.VersusMod;
+import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.PotentSulfurBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.PotentSulfurState;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.material.Fluids;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Sulfur: every sulfur pool has many geysers on its floor, potent sulfur with a magma block beneath; sulfur spikes
+ * poison and nauseate what they hurt.
+ */
+public class SulfurGameTest {
+
+    // 48 x 40 x 48, a grass floor, with sky access
+    private static final String GROVE = "players-versus-gametest:leaves_grove";
+    private static final int SEEDS = 8, FROM = 14, TO = 34, TOP = 12;
+
+    /** A slab of sulfur from the floor up to TOP, around the grove's middle (24, 24), with air over it. */
+    private static void slab(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        for (BlockPos pos : BlockPos.betweenClosed(FROM, 1, FROM, TO, TOP + 8, TO)) {
+            BlockState want = pos.getY() <= TOP ? Blocks.SULFUR.defaultBlockState() : Blocks.AIR.defaultBlockState();
+            level.setBlock(helper.absolutePos(pos), want, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+        }
+    }
+
+    /**
+     * A sulfur pool always has many geysers on its floor (the solid blocks under its water): a third of it at least, and
+     * never fewer than six where it has as many, each potent sulfur with a magma block beneath, dormant till it erupts.
+     * Grown on a slab of sulfur, as the sulfur caves' floors are, over several seeds.
+     */
+    @GameTest(structure = GROVE, maxTicks = 40, skyAccess = true)
+    public void everySulfurPoolHasManyGeysersOnItsFloor(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        Feature pool = level.registryAccess().lookupOrThrow(Registries.FEATURE).getValue(Identifier.withDefaultNamespace("sulfur_pool"));
+        helper.assertTrue(pool != null, "minecraft:sulfur_pool is not a feature");
+        List<String> pools = new ArrayList<>();
+        for (int seed = 0; seed < SEEDS; seed++) {
+            slab(helper);
+            pool.place(level, level.getChunkSource().getGenerator(), RandomSource.create((seed + 1) * 0x9E3779B97F4A7C15L), helper.absolutePos(new BlockPos(24, TOP, 24)));
+            int floor = 0, geysers = 0;
+            for (BlockPos pos : BlockPos.betweenClosed(FROM, 1, FROM, TO, TOP, TO)) {
+                BlockState state = helper.getBlockState(pos);
+                if (state.isAir() || !state.getFluidState().isEmpty() || !helper.getBlockState(pos.above()).getFluidState().isSourceOfType(Fluids.WATER)) continue;
+                floor++;
+                if (!state.is(Blocks.POTENT_SULFUR)) continue;
+                geysers++;
+                helper.assertTrue(helper.getBlockState(pos.below()).is(Blocks.MAGMA_BLOCK),
+                        "seed " + seed + ": potent sulfur at " + pos.toShortString() + " over " + helper.getBlockState(pos.below()) + ", not magma");
+                helper.assertTrue(state.getValue(PotentSulfurBlock.STATE) == PotentSulfurState.DORMANT, "seed " + seed + ": a geyser that isn't dormant: " + state);
+            }
+            helper.assertTrue(floor > 0, "seed " + seed + ": no pool grew");
+            helper.assertTrue(geysers >= Math.min(6, floor) && 3 * geysers >= floor, "seed " + seed + ": " + geysers + " geysers on a pool floor of " + floor + " blocks");
+            pools.add(geysers + " of " + floor);
+        }
+        VersusMod.MOD_LOGGER.info("Sulfur pools: geysers of their floor's blocks: {}", String.join(", ", pools));
+        slab(helper);
+        helper.succeed();
+    }
+}
