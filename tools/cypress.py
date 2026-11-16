@@ -5,8 +5,10 @@
 
 Cypress leaves are the cypress's lighter leaves, its highlights among its spruce leaves (CypressFoliagePlacer): spruce
 leaves' texture given azalea leaves' colours, shade for shade (the darkest of spruce's greys takes azalea's darkest
-green, the lightest its lightest), untinted, so they're the same yellow-green in every biome. Otherwise they're spruce
-leaves: their loot table (spruce saplings and sticks; themselves to shears or silk touch), the leaves tags, the names.
+green, the lightest its lightest), untinted, so they're the same yellow-green in every biome, and mipmapped as spruce
+leaves are (their texture's metadata: dark_cutout, so fast leaves, drawn opaque, show their gaps dark). Otherwise they're
+spruce leaves: their loot table (spruce saplings and sticks; themselves to shears or silk touch), the leaves tags, the
+names.
 """
 import json
 import os
@@ -45,6 +47,8 @@ def main(vanilla):
     path = os.path.join(ASSETS, MOD, "textures", "block", "cypress_leaves.png")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     image.save(path)
+    with open(os.path.join(textures, "spruce_leaves.png.mcmeta")) as file:
+        write_json(ASSETS, f"{MOD}/textures/block/cypress_leaves.png.mcmeta", json.load(file))
     # Untinted, as the azalea's leaves are (cube_all, no tint index)
     write_json(ASSETS, f"{MOD}/models/block/cypress_leaves.json", {"parent": "minecraft:block/cube_all", "textures": {"all": f"{MOD}:block/cypress_leaves"}})
     write_json(ASSETS, f"{MOD}/blockstates/cypress_leaves.json", {"variants": {"": {"model": f"{MOD}:block/cypress_leaves"}}})
