@@ -41,6 +41,25 @@ class SourFovTest {
     }
 
     @Test
+    void aSourRenewedWhileItLastsKeepsTheViewWide() {
+        // Frame by frame, as the camera sees it: a lemon's Sour, well into its easing back
+        SourFov.Tracker tracker = new SourFov.Tracker();
+        float peak = VersusSettings.Lemons.SOUR_PEAK, before = 1.0F;
+        for (float remaining = DURATION; remaining >= 30; remaining -= 0.5F) before = tracker.multiplier(remaining, DURATION);
+        assertTrue(before > 1.0F && before < peak, "not easing back: " + before);
+        // A second lemon eaten while sour renews it: the view goes back to its peak, never back to normal first
+        float renewed = tracker.multiplier(DURATION, DURATION);
+        assertEquals(peak, renewed, 1e-6, "a renewed Sour took the view from " + before + " to " + renewed);
+        for (float remaining = DURATION - 0.5F; remaining > VersusSettings.Lemons.SOUR_FALL_TICKS; remaining -= 0.5F) {
+            assertEquals(peak, tracker.multiplier(remaining, DURATION), 1e-6, "the renewed Sour left its peak at " + remaining);
+        }
+        // Once it's over, the next Sour widens the view from nothing again
+        assertEquals(1.0F, tracker.multiplier(0, DURATION), 1e-6, "Sour over and the view still wide");
+        assertEquals(1.0F, tracker.multiplier(DURATION, DURATION), 1e-6, "a new Sour after one ended didn't widen from nothing");
+        assertEquals(peak, tracker.multiplier(DURATION - VersusSettings.Lemons.SOUR_RISE_TICKS, DURATION), 1e-6, "a new Sour didn't rise to its peak");
+    }
+
+    @Test
     void aLongerSourHoldsItsPeakLonger() {
         // A command's longer Sour: no rise to wait for, the peak until its last ticks
         assertEquals(VersusSettings.Lemons.SOUR_PEAK, SourFov.multiplier(200, 200 * 2), 1e-6);
