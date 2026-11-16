@@ -67,14 +67,19 @@ Asked (2026-11-15), with a reference picture of a "Medium Cypress Tree":
 ## As built
 
 - **Lemons** (`Fruits`, `VersusSettings.Lemons`): as decided; the Sour view widens in 2 ticks, holds about a second and
-  eases back over its last 60 ticks.
+  eases back over its last 60 ticks. A lemon eaten while sour renews Sour: the camera (`SourFov.Tracker`) sees its time
+  left go up and holds the view at its peak, rather than drop it to normal and widen it again (the final review's).
 - **Cypress leaves** (`tools/cypress.py`, `CustomBlocks.CYPRESS_LEAVES`): vanilla's `LeavesBlock` as spruce's, untinted
   through a `cube_all` model as azalea's leaves are, each pixel of spruce leaves taking azalea's green of the same rank of
-  brightness; alive by spruce logs (`LeafReach`); spruce leaves' loot.
+  brightness, mipmapped as leaves are (spruce leaves' `dark_cutout` metadata, the final review's); alive by spruce logs
+  (`LeafReach`), one kind with spruce leaves, as azalea's two leaves are, so each reaches the trunk through the other
+  (the final review's: by their own block only, a cypress lost one leaf in eight the first time its leaves ticked);
+  spruce leaves' loot.
 - **The cypress** (`CypressFoliagePlacer`, registered as `players-versus:cypress_foliage_placer` in `CustomWorldgen`):
   rows down the trunk from its top to a block or two above the ground, by height in the crown (0 its foot, 1 its top
   row): a plus below 0.1, the square with fuzz (a leaf one block out from a side, 35%) to 0.45, the square with its
   corners kept 60% and 10% fuzz to 0.75, a plus above, then a spire of two or three single leaves over the trunk.
+  Each row's square first, then its fuzz, only where the leaf inside it grew (so none hangs beside a ragged corner).
   Highlights 15% + 55% of the height (20% more on fuzz, 90% on the spire).
 - **The lemon bush** (`tools/lemons.py`): the lower half an oak stem two pixels wide, flared to three at its foot; the
   upper half four boxes of `lemon_bush_leaves` (oak leaves in a fixed citrus green): a 12-pixel box reaching three pixels
@@ -82,7 +87,11 @@ Asked (2026-11-15), with a reference picture of a "Medium Cypress Tree":
   the boxes 0.05 pixel larger. The item is a tiny tree. The gallery's scene is `tools/gallery-cypress-lemons.txt`.
 - **Checks**: `LemonsGameTest.aLemonIsALittleFoodAndAQuickSour`, `TuscanGroveGameTest.cypressLeavesAreSpruceLeavesInLighterColours`
   and `aCypressIsAFuzzyPear` (24 seeds), `LemonBushModelsTest` (2); each watched failing first. The gallery looked at:
-  the cypresses and the three stages of bush up close, and the Tuscan grove.
+  the cypresses and the three stages of bush up close, and the Tuscan grove. After the final review:
+  `TuscanGroveGameTest.aCypressKeepsEveryLeafWhenItsLeavesTick` (24 trees on seeds giving both trunk heights, a tick on
+  every leaf, none lost), `SourFovTest.aSourRenewedWhileItLastsKeepsTheViewWide`, `CypressLeavesDataTest`; each watched
+  failing first. The fuzzy pear's "more cypress leaves up high" is over its 24 trees (at least 1.3 times): a highlight is
+  a draw, and about one tree in ninety comes out even on its own.
 - **The lemon trees** (decision 5): gone, as decided. `LemonBushBlock` holds the stages (`FRUIT`, `BARE`, `BLOSSOMS`,
   `LEMONS`) the lemon leaves held; `LemonBushModelsTest.theLemonTreesAreGone` checks nothing of them is left in the
   assets or data (watched failing first).
