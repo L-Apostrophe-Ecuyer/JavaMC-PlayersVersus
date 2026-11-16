@@ -45,6 +45,7 @@
     "environment.blocks.LadderMixin",
     "environment.blocks.LeafMovementMixin",
     "environment.blocks.LeavesMixin",
+    "environment.blocks.SulfurSpikeBlockMixin",
     "environment.blocks.FelledTreeDamageMixin",
     "environment.blocks.FelledTreeLandingMixin",
     "environment.blocks.TreeDigMixin",

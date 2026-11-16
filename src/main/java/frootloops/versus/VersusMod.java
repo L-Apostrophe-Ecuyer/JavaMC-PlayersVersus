@@ -46,6 +46,7 @@ public class VersusMod implements ModInitializer {
 
 		MOD_LOGGER.info("Initializing custom blocks, sounds, and particles...");
 		CustomBlocks.onInitialize();
+		frootloops.versus.mod.environment.blocks.sulfur.SulfurSpikes.register();
 		CustomSpecialEffects.onInitialize();
 
 		MOD_LOGGER.info("Registering new potions...");

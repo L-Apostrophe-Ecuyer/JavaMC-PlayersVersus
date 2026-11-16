@@ -3,18 +3,28 @@ package frootloops.versus.gametest;
 import frootloops.versus.VersusMod;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PotentSulfurBlock;
+import net.minecraft.world.level.block.SpeleothemBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.PotentSulfurState;
+import net.minecraft.world.level.block.state.properties.SpeleothemThickness;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,5 +80,61 @@ public class SulfurGameTest {
         VersusMod.MOD_LOGGER.info("Sulfur pools: geysers of their floor's blocks: {}", String.join(", ", pools));
         slab(helper);
         helper.succeed();
+    }
+
+    /** A sulfur spike, its tip pointing this way. */
+    private static BlockState spike(Direction tip) {
+        return Blocks.SULFUR_SPIKE.defaultBlockState().setValue(SpeleothemBlock.TIP_DIRECTION, tip).setValue(SpeleothemBlock.THICKNESS, SpeleothemThickness.TIP);
+    }
+
+    /** A pig that stays put, with 40 health so that no hurt here kills it. */
+    private static LivingEntity sturdyPig(GameTestHelper helper, double x, double y, double z) {
+        LivingEntity pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new Vec3(x, y, z));
+        pig.getAttribute(Attributes.MAX_HEALTH).setBaseValue(40.0);
+        pig.setHealth(40.0F);
+        return pig;
+    }
+
+    /**
+     * That this pig was hurt, and is poisoned for at most a second a point of damage dealt and nauseous for five seconds
+     * up to a second a point (checked as soon as it is: its poison may have hurt it a point more since).
+     */
+    private static void afflictedForItsHurt(GameTestHelper helper, LivingEntity pig, String what) {
+        float dealt = pig.getMaxHealth() - pig.getHealth();
+        helper.assertTrue(dealt > 0, what + " didn't hurt the pig");
+        MobEffectInstance poison = pig.getEffect(MobEffects.POISON), nausea = pig.getEffect(MobEffects.NAUSEA);
+        helper.assertTrue(poison != null && poison.getAmplifier() == 0 && poison.getDuration() <= 20 * Math.max(1, Mth.floor(dealt)),
+                what + " dealt " + dealt + " and left poison " + poison);
+        helper.assertTrue(nausea != null && nausea.getAmplifier() == 0 && nausea.getDuration() > 90 && nausea.getDuration() <= 20 * Math.max(5, Mth.floor(dealt)),
+                what + " dealt " + dealt + " and left nausea " + nausea);
+    }
+
+    /** A sulfur spike falling onto a pig poisons it and makes it nauseous, for as long as the damage it dealt allows. */
+    @GameTest(structure = GROVE, maxTicks = 60, skyAccess = true)
+    public void aFallingSulfurSpikePoisonsAndNauseatesWhatItHurts(GameTestHelper helper) {
+        LivingEntity pig = sturdyPig(helper, 10.5, 1.0, 10.5);
+        helper.setBlock(new BlockPos(10, 4, 10), Blocks.STONE);
+        helper.setBlock(new BlockPos(10, 3, 10), spike(Direction.DOWN));
+        helper.getLevel().scheduleTick(helper.absolutePos(new BlockPos(10, 3, 10)), Blocks.SULFUR_SPIKE, 1);
+        helper.succeedWhen(() -> afflictedForItsHurt(helper, pig, "the falling spike"));
+    }
+
+    /** Landing on a sulfur spike: the fall's hurt is the spike's, and it poisons and nauseates as one falling does. */
+    @GameTest(structure = GROVE, maxTicks = 80, skyAccess = true)
+    public void landingOnASulfurSpikePoisonsAndNauseates(GameTestHelper helper) {
+        helper.setBlock(new BlockPos(20, 1, 10), spike(Direction.UP));
+        LivingEntity pig = sturdyPig(helper, 20.5, 9.0, 10.5);
+        helper.succeedWhen(() -> afflictedForItsHurt(helper, pig, "landing on the spike"));
+    }
+
+    /** A fall as long onto plain ground hurts too, but neither poisons nor nauseates. */
+    @GameTest(structure = GROVE, maxTicks = 80, skyAccess = true)
+    public void aFallOntoPlainGroundDoesNeither(GameTestHelper helper) {
+        LivingEntity pig = sturdyPig(helper, 30.5, 9.0, 10.5);
+        helper.runAfterDelay(60, () -> {
+            helper.assertTrue(pig.getHealth() < pig.getMaxHealth(), "the fall didn't hurt the pig");
+            helper.assertTrue(!pig.hasEffect(MobEffects.POISON) && !pig.hasEffect(MobEffects.NAUSEA), "a fall onto grass poisoned or nauseated the pig");
+            helper.succeed();
+        });
     }
 }

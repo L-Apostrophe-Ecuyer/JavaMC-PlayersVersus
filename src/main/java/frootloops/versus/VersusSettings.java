@@ -234,6 +234,14 @@ public abstract class VersusSettings {
         public static float SOUR_MAX_FOV = 165.0f;
     }
 
+    public static class SulfurSpikes {
+        // A sulfur spike that hurts something (falling on it, or it falling onto one) poisons it for a whole number of
+        // seconds from POISON_SECONDS to the damage it dealt, and makes it nauseous for one from NAUSEA_SECONDS to the damage
+        // dealt (that many when it dealt less), each drawn evenly
+        public static int POISON_SECONDS = 1;
+        public static int NAUSEA_SECONDS = 5;
+    }
+
     public static class Mushrooms {
         // Brown and red mushrooms grow by stages of one, two and three, and below y 0 into pale shrooms (MushroomGrowth)
         public static boolean DO_STAGED_MUSHROOMS = true;
