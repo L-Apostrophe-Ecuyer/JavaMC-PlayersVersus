@@ -42,3 +42,17 @@ Asked (2026-11-16), while the cypress work was finishing:
   nauseate a pig for times within the damage it took; a fall onto plain ground doesn't.
 - Unit test: the durations' bounds, both ends reachable.
 - The gallery: a sulfur pool, looked at.
+
+## As built
+
+- **Geysers** (`PoolGeysersFeature`, `players-versus:pool_geysers`, registered in `CustomWorldgen`; the second step of
+  the mod's `data/minecraft/worldgen/feature/sulfur_pool.json`, vanilla's lake its first): as decided. In the data:
+  potent sulfur `dormant`, magma, share 0.3333 (a third, rounded up), minimum 6, `can_replace` the lake's own barrier
+  rule (not `#minecraft:lava_pool_stone_cannot_replace`). The floor is scanned in the lake's box, 4 to 2 blocks below
+  the origin. The game test's eight pools: 17 to 31 geysers on floors of 49 to 93 blocks.
+- **Sulfur spikes** (`SulfurSpikes`, `SulfurSpikeBlockMixin`, `VersusSettings.SulfurSpikes`): as decided. A falling
+  spike's hurt through Fabric's `ServerLivingEntityEvents.AFTER_DAMAGE` (its damage taken); landing on a spike measured
+  as the health and absorption lost around vanilla's `fallOn`.
+- **Checks**: `SulfurGameTest` (the pools; a falling spike; landing on a spike; a fall onto plain ground, a guard that
+  passed from the start) and `SulfurSpikesTest` (2), the rest watched failing first. The gallery's scene is
+  `tools/gallery-sulfur.txt`.
