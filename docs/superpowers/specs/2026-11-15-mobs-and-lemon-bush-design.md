@@ -93,7 +93,9 @@ Asked (2026-11-15), alongside finishing the refinement pass:
   another of itself: otherwise a new world would have no sapling. (Using bone meal on it picks the lemons first, as using
   anything does: the sapling takes a sneak, or a dispenser.) The orchards are clumps of four tries within two
   blocks of each spot their noise picks. The old tree feature keeps its id (`players-versus:lemon_bush`; Java key
-  `LEMON_TREE`); the block is `players-versus:lemon_bush` too, in the block registry.
+  `LEMON_TREE`); the block is `players-versus:lemon_bush` too, in the block registry. (Later the same day the owner
+  found the bushes ugly: they, the sapling and the orchards are gone, with the old trees; the lemon stays, as food.
+  See `2026-11-15-cypress-lemon-look-and-lemons-design.md`, decisions 5 and 6.)
 - **Checks**: `SpawnRulesGameTest` (7), `EndermanShulkerGameTest` (+2), `LemonsGameTest` (+7), `PaleKinTest`,
   `MobSpawningTest` (+4), `BiomeDataTest` (+1). The new behaviour's tests were watched failing first (the rules' unit
   tests, the pale kin, the watchlings, the despawn, the bush); the built rooms' rule checks and the killed enderman's

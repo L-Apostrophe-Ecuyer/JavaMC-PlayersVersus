@@ -124,7 +124,7 @@ class BiomeDataTest {
 
     /**
      * The Tuscan grove is cypresses (a tall column of spruce leaves, taller than an oak; its width is the game test's), oaks in
-     * olive-grey leaves and lemon orchards, with fields of flowers and of dry grass.
+     * olive-grey leaves, with fields of flowers and of dry grass.
      */
     @Test
     void theTuscanGroveGrowsCypressesAndHasFieldsOfFlowersAndDryGrass() throws IOException {
@@ -463,39 +463,5 @@ class BiomeDataTest {
             assertTrue(english.has("biome.players-versus." + name), name + " has no English name");
             assertTrue(french.has("biome.players-versus." + name), name + " has no French name");
         }
-    }
-
-    /**
-     * Lemons grow on lemon bushes (tiny trees two blocks tall), not on the lemon trees of earlier versions, which are gone:
-     * the Tuscan grove's orchards place patches of lemon bushes, at every stage, where a bush would stand; and no biome
-     * places a feature players-versus:lemon_bush (the old tree's id).
-     */
-    @Test
-    void theOrchardsAreLemonBushesAndNoBiomeGrowsLemonTrees() throws IOException {
-        JsonObject orchards = read(DATA.resolve("players-versus/worldgen/placed_feature/lemon_orchards.json"));
-        assertEquals("players-versus:lemon_bushes", orchards.get("feature").getAsString(), "the orchards don't place lemon bushes");
-        assertTrue(orchards.get("placement").toString().contains("\"players-versus:lemon_bush\""), "the orchards don't look for where a bush would stand: " + orchards);
-        JsonObject bushes = read(DATA.resolve("players-versus/worldgen/feature/lemon_bushes.json"));
-        assertEquals("minecraft:simple_block", bushes.get("type").getAsString());
-        String placed = bushes.get("to_place").toString();
-        for (int fruit = 0; fruit <= 2; fruit++) {
-            assertTrue(placed.contains("\"players-versus:lemon_bush\"") && placed.contains("\"fruit\":\"" + fruit + "\""), "the orchards have no bushes at stage " + fruit + ": " + placed);
-        }
-        List<String> trees = new ArrayList<>();
-        for (String namespace : List.of("players-versus", "minecraft")) {
-            try (Stream<Path> files = Files.walk(DATA.resolve(namespace + "/worldgen/biome"))) {
-                for (Path file : files.filter(f -> f.toString().endsWith(".json")).toList()) {
-                    for (JsonElement step : read(file).getAsJsonArray("features")) {
-                        for (JsonElement feature : step.getAsJsonArray()) {
-                            String id = feature.getAsString();
-                            if (!id.startsWith("players-versus:")) continue;
-                            Path placedFile = DATA.resolve("players-versus/worldgen/placed_feature/" + id.substring(id.indexOf(':') + 1) + ".json");
-                            if (Files.exists(placedFile) && read(placedFile).get("feature").toString().equals("\"players-versus:lemon_bush\"")) trees.add(file.getFileName() + ": " + id);
-                        }
-                    }
-                }
-            }
-        }
-        assertTrue(trees.isEmpty(), "biomes that still grow lemon trees: " + trees);
     }
 }

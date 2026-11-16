@@ -485,8 +485,6 @@
   "item.players-versus.pale_wandering_trader_spawn_egg": "Pale Wandering Trader Spawn Egg",
 
   "item.players-versus.lemon": "Lemon",
-  "block.players-versus.lemon_sapling": "Lemon Sapling",
-  "block.players-versus.potted_lemon_sapling": "Potted Lemon Sapling",
   "effect.players-versus.sour": "Sour",
 
   "biome.players-versus.tuscan_grove": "Tuscan Grove",
@@ -512,7 +510,6 @@
 
   "biome.players-versus.rocky_snowy_plains": "Rocky Snowy Plains",
 
-  "block.players-versus.lemon_bush": "Lemon Bush",
 
   "block.players-versus.cypress_leaves": "Cypress Leaves"
 }

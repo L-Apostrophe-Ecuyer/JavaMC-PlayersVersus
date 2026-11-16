@@ -51,7 +51,7 @@ public class CustomOverworldBiomes {
     public static final ResourceKey<Biome> PALE_GROTTO = keyOf("caves/pale_grotto");
     public static final ResourceKey<Biome> PALE_HOLLOW = keyOf("caves/pale_hollow");
     public static final ResourceKey<Biome> MUSHROOM_CAVES = keyOf("caves/mushroom_caves");
-    /** The cool edge of savannas: an open, sunny grove of round oaks and lemon bushes on dry grass, a few acacias. */
+    /** The cool edge of savannas: an open, sunny grove of cypresses and round oaks among fields of flowers and dry grass. */
     public static final ResourceKey<Biome> TUSCAN_GROVE = keyOf("tuscan_grove");
     /** The cool edge of the drier jungles, next to birch forests and forests: oaks mixed with jungle trees and bushes. */
     public static final ResourceKey<Biome> WARM_OAK_FOREST = keyOf("warm_oak_forest");

@@ -60,3 +60,8 @@
 
 - [ ] Failing test: nothing of the lemon trees is left in the assets or data; the crowns use the bush's own overlays. Remove, regenerate. Run the lemon and tree growth game tests. Commit.
 
+### Task 7: Remove the lemon bushes (asked during execution)
+
+**Files:** delete `LemonBushBlock`; `CustomBlocks` (the bush, the sapling, its pot, the grower), `CustomBlockItems`, `RegisteringCustomItems`, `VersusSettings.Lemons` (no `FRUIT_GROW_CHANCE`), `Fruits` (its doc); `tools/lemons.py` (the lemon, Sour's icon, names, the helpers `tools/cypress.py` uses), `tools/transition-biomes.py` (no orchards); the bush's, sapling's and orchards' assets and data, their tag entries and names; `LemonsGameTest` (the food test only), `BiomeDataTest`, `LemonBushModelsTest` (deleted), new `LemonsDataTest`; `tools/gallery-cypress.txt`.
+
+- [ ] Failing test (`LemonsDataTest`): no file under the resources named for, or holding, the lemon plants (`lemon_bush`, `lemon_sapling`, `lemon_leaves`, `lemon_orchards`); the lemon's item, texture and name and Sour's icon stay. Remove, regenerate. Run the unit suite, the lemon, Tuscan grove and tree growth game tests; the client compiles. Commit.

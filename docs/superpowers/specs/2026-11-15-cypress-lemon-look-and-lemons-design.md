@@ -48,13 +48,20 @@ Asked (2026-11-15), with a reference picture of a "Medium Cypress Tree":
    tags, names), the tree feature and its checked placement go; the fruit overlays the bush's crowns use are the bush's
    own (`lemon_bush_blossoms`, `lemon_bush_lemons`). A world that has lemon leaves loses them (unknown blocks become
    air).
+6. **The lemon bushes go too** (the owner, next: "It's the two block lemon trees that are ugly."): the two-block bushes
+   were what was meant. They go with all that grew or placed them: the lemon bush (block, item, models, textures, loot,
+   picking table, tags, names), the lemon sapling and its pot, and the Tuscan grove's orchards (`lemon_bushes`,
+   `lemon_bush_plant`, `lemon_orchards`). The full trees stay gone (they were replaced by the bushes at the owner's own
+   request that morning). The lemon (item) and Sour stay as decision 1 has them, with nothing growing lemons for now.
+   A world that has lemon bushes or saplings loses them.
 
 ## Checks
 
 - Game tests: eating a lemon gives the three effects for their times, takes 40 ticks, fills one hunger and no
   saturation; cypress leaves live by spruce logs and drop as spruce leaves; grown cypresses are pears (wider below than
   above, a spire on top, nothing beyond two blocks from the trunk) of both leaves (cypress ones more up high).
-- Data: the bush's models and blockstates (trunk below, crowns above, every stage).
+- Data: the bush's models and blockstates (trunk below, crowns above, every stage); after decision 6, nothing of the
+  lemon plants left, the lemon and Sour kept.
 - The gallery: a cypress and lemon bushes up close, looked at.
 
 ## As built
@@ -79,4 +86,7 @@ Asked (2026-11-15), with a reference picture of a "Medium Cypress Tree":
 - **The lemon trees** (decision 5): gone, as decided. `LemonBushBlock` holds the stages (`FRUIT`, `BARE`, `BLOSSOMS`,
   `LEMONS`) the lemon leaves held; `LemonBushModelsTest.theLemonTreesAreGone` checks nothing of them is left in the
   assets or data (watched failing first).
-
+- **The lemon bushes** (decision 6): gone, as decided, with `LemonBushBlock`, the sapling, its pot and the orchards;
+  `tools/lemons.py` writes only the lemon, Sour's icon and their names; the gallery's scene is `tools/gallery-cypress.txt`.
+  `LemonsDataTest` checks nothing of the lemon plants is left in the resources and that the lemon and Sour are (watched
+  failing first); `LemonBushModelsTest`, the bush game tests and `BiomeDataTest`'s orchard test went with the bushes.

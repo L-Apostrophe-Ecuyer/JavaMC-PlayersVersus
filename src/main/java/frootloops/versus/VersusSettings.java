@@ -218,8 +218,6 @@ public abstract class VersusSettings {
     }
 
     public static class Lemons {
-        // Lemon bushes go bare -> blossoms -> lemons, one stage on this chance a random tick (about nine minutes a stage)
-        public static float FRUIT_GROW_CHANCE = 0.125f;
         // A lemon is a little food (1 hunger, no saturation) eaten in this many ticks
         public static int EAT_TICKS = 40;
         // Eating one makes one Sour this long, in ticks: the view widens at once and eases back (SourFov); slow as long, and

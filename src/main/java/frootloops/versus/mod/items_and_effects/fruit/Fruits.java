@@ -14,12 +14,12 @@ import java.util.List;
 
 import static frootloops.versus.mod.items_and_effects.RegisteringCustomItems.getItemSettings;
 
-/** The fruit picked from fruiting leaves. Made once the effects exist (a lemon makes one Sour). */
+/** The mod's fruit. Made once the effects exist (a lemon makes one Sour). */
 public final class Fruits {
 
     /**
      * A little food (1 hunger, no saturation, eaten in EAT_TICKS) and a quick Sour: eating one makes one Sour, slow and
-     * hasty (VersusSettings.Lemons). Picked from lemon bushes, 2 to 6 at a time.
+     * hasty (VersusSettings.Lemons). Nothing grows them now (the lemon trees and bushes are gone).
      */
     public static Item LEMON;
 
