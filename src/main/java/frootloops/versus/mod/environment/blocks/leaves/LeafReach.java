@@ -21,7 +21,8 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * What keeps natural leaves alive (LeavesMixin): one of their own tree's logs, stripped or not, within vanilla's six
  * blocks, counting through leaves of their own kind. Oak leaves also take the jungle log a jungle bush grows them on,
- * azalea's two leaves are one kind, and leaves whose tree has no logs of its own here take any log.
+ * azalea's two leaves are one kind, so are spruce leaves and the cypress's lighter leaves among them, and leaves whose
+ * tree has no logs of its own here take any log.
  *
  * <p>Built the first time a leaf asks, not as a static part of the leaves block: that class loads while the game is still
  * making its blocks, before any leaves exist to be keys.
@@ -53,7 +54,7 @@ public final class LeafReach {
 
     /** Whether a log's reach passes from this neighbour on to these leaves: leaves of their own kind. */
     public static boolean isOwnKind(Block leaves, BlockState neighbour) {
-        return neighbour.is(leaves) || isAzalea(leaves) && isAzalea(neighbour.getBlock());
+        return neighbour.is(leaves) || isAzalea(leaves) && isAzalea(neighbour.getBlock()) || isSpruce(leaves) && isSpruce(neighbour.getBlock());
     }
 
     /**
@@ -91,5 +92,10 @@ public final class LeafReach {
 
     private static boolean isAzalea(Block leaves) {
         return leaves == Blocks.AZALEA_LEAVES || leaves == Blocks.FLOWERING_AZALEA_LEAVES;
+    }
+
+    /** Spruce leaves and the cypress's lighter leaves, which a cypress grows mixed: each reaches its trunk through the other. */
+    private static boolean isSpruce(Block leaves) {
+        return leaves == Blocks.SPRUCE_LEAVES || leaves == CustomBlocks.CYPRESS_LEAVES;
     }
 }

@@ -5,6 +5,7 @@ import frootloops.versus.mod.environment.blocks.leaves.LeafReach;
 import frootloops.versus.mod.environment.blocks.trees.TreeBlock;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
@@ -16,12 +17,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -51,7 +55,9 @@ public class TuscanGroveGameTest {
     /**
      * A cypress is a fuzzy pear on a spruce trunk, as the owner's picture: its crown wider below than above, a spire of
      * single leaves over the trunk's top, no leaf more than two blocks from the trunk (but some two blocks out: fuzz), of
-     * spruce leaves with cypress leaves for highlights, more of them up high.
+     * spruce leaves with cypress leaves for highlights, more of them up high: over the trees, cypress leaves at least 1.3
+     * times as common in the crowns' upper halves as in their lower ones (a highlight is a draw, the higher the likelier,
+     * so about one tree in ninety comes out even on its own; over 24 trees the share is 1.4 to 2 times).
      */
     @GameTest(structure = GROVE, maxTicks = 40, skyAccess = true)
     public void aCypressIsAFuzzyPear(GameTestHelper helper) {
@@ -59,7 +65,7 @@ public class TuscanGroveGameTest {
         Feature cypress = level.registryAccess().lookupOrThrow(Registries.FEATURE).getValue(Identifier.parse("players-versus:cypress"));
         helper.assertTrue(cypress != null, "players-versus:cypress is not a feature");
         BlockPos origin = helper.absolutePos(new BlockPos(24, 1, 24));
-        int fuzzy = 0;
+        int fuzzy = 0, lowerLeaves = 0, lowerLights = 0, upperLeaves = 0, upperLights = 0;
         for (int seed = 0; seed < SEEDS; seed++) {
             clear(helper);
             helper.assertTrue(cypress.place(level, level.getChunkSource().getGenerator(), RandomSource.create(seed), origin), "the cypress didn't grow with seed " + seed);
@@ -101,12 +107,49 @@ public class TuscanGroveGameTest {
             helper.assertTrue((double) lower / lowerRows > 1.3 * upper / upperRows,
                     "seed " + seed + ": " + lower + " leaves in the lower half's " + lowerRows + " rows against " + upper + " in the upper half's " + upperRows + ": no pear");
             helper.assertTrue(lowerLight + upperLight > 0 && lowerLight + upperLight < lower + upper, "seed " + seed + ": not a mix of spruce and cypress leaves");
-            helper.assertTrue((double) upperLight / upper > (double) lowerLight / lower,
-                    "seed " + seed + ": cypress leaves " + upperLight + " of " + upper + " up high, " + lowerLight + " of " + lower + " below");
+            lowerLeaves += lower;
+            lowerLights += lowerLight;
+            upperLeaves += upper;
+            upperLights += upperLight;
         }
+        helper.assertTrue((double) upperLights / upperLeaves > 1.3 * lowerLights / lowerLeaves,
+                "cypress leaves " + upperLights + " of " + upperLeaves + " up high, " + lowerLights + " of " + lowerLeaves + " below");
         helper.assertTrue(fuzzy >= SEEDS / 2, "only " + fuzzy + " of " + SEEDS + " cypresses have a leaf sticking out two blocks");
         clear(helper);
         helper.succeed();
+    }
+
+    /**
+     * A grown cypress keeps every leaf when its leaves tick, as they soon do in the world (the tree feature schedules ticks
+     * on its crown's surface as it grows): its spruce and cypress leaves are one kind, each reaching the trunk through the
+     * other, and no leaf of its fuzz hangs off by itself. Twenty-four trees on seeds scattered over both trunk heights (the
+     * first small seeds all grow the taller one), a tick on every leaf, every leaf still there five ticks later: the shape
+     * aCypressIsAFuzzyPear checks as grown is the shape that lasts.
+     */
+    @GameTest(structure = GROVE, maxTicks = 40, skyAccess = true)
+    public void aCypressKeepsEveryLeafWhenItsLeavesTick(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        Feature cypress = level.registryAccess().lookupOrThrow(Registries.FEATURE).getValue(Identifier.parse("players-versus:cypress"));
+        helper.assertTrue(cypress != null, "players-versus:cypress is not a feature");
+        for (int tree = 0; tree < SEEDS; tree++) {
+            BlockPos at = helper.absolutePos(new BlockPos(4 + 8 * (tree % 6), 1, 6 + 12 * (tree / 6)));
+            long seed = (tree + 1) * 0x9E3779B97F4A7C15L;
+            helper.assertTrue(cypress.place(level, level.getChunkSource().getGenerator(), RandomSource.create(seed), at), "the cypress didn't grow with seed " + seed);
+        }
+        Map<BlockPos, Block> before = new HashMap<>();
+        for (BlockPos pos : BlockPos.betweenClosed(0, 1, 0, 47, 39, 47)) {
+            BlockState state = helper.getBlockState(pos);
+            if (!(state.getBlock() instanceof LeavesBlock) || state.getValue(LeavesBlock.PERSISTENT)) continue;
+            before.put(pos.immutable(), state.getBlock());
+            level.scheduleTick(helper.absolutePos(pos), state.getBlock(), 1);
+        }
+        helper.assertTrue(before.size() > SEEDS * 40, "only " + before.size() + " leaves on " + SEEDS + " cypresses");
+        helper.runAfterDelay(5, () -> {
+            List<String> lost = before.entrySet().stream().filter(leaf -> !helper.getBlockState(leaf.getKey()).is(leaf.getValue()))
+                    .map(leaf -> leaf.getKey().toShortString() + " " + BuiltInRegistries.BLOCK.getKey(leaf.getValue()).getPath()).toList();
+            helper.assertTrue(lost.isEmpty(), lost.size() + " of " + before.size() + " leaves lost: " + String.join(", ", lost.subList(0, Math.min(8, lost.size()))));
+            helper.succeed();
+        });
     }
 
     /**

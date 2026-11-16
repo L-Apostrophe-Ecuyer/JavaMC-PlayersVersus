@@ -81,18 +81,24 @@ public class CypressFoliagePlacer extends FoliagePlacer {
         double highlight = HIGHLIGHT_FOOT + HIGHLIGHT_RISE * height;
         boolean square = height >= WIDE_FROM && height < TOP_FROM;
         double fuzz = height < WIDE_FROM || height >= TOP_FROM ? 0.0 : height < MIDDLE_FROM ? WIDE_FUZZ : MIDDLE_FUZZ;
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                int ax = Math.abs(dx), az = Math.abs(dz);
+                // The foot and the top are a plus; the middle's corners are ragged
+                if (!square && ax + az > radius) continue;
+                if (ax == radius && az == radius && height >= MIDDLE_FROM && random.nextDouble() >= MIDDLE_CORNERS) continue;
+                this.leaf(level, setter, random, tree, middle.offset(dx, 0, dz), highlight);
+            }
+        }
+        if (fuzz <= 0.0) return;
+        // Then the fuzz: a leaf one block out from a side of the square, only where the leaf inside it grew (a ragged
+        // corner leaves nothing to hold on to), so no leaf of it hangs off by itself; never out from a corner
         for (int dx = -radius - 1; dx <= radius + 1; dx++) {
             for (int dz = -radius - 1; dz <= radius + 1; dz++) {
                 int ax = Math.abs(dx), az = Math.abs(dz);
-                boolean inSquare = ax <= radius && az <= radius;
-                if (inSquare) {
-                    boolean corner = ax == radius && az == radius;
-                    // The foot and the top are a plus; the middle's corners are ragged
-                    if (!square && ax + az > radius) continue;
-                    if (corner && height >= MIDDLE_FROM && random.nextDouble() >= MIDDLE_CORNERS) continue;
-                    this.leaf(level, setter, random, tree, middle.offset(dx, 0, dz), highlight);
-                } else if (Math.min(ax, az) <= radius && fuzz > 0.0 && random.nextDouble() < fuzz) {
-                    // One block out from a side of the square (never from a corner: no leaf only touching an edge)
+                if (Math.max(ax, az) <= radius || Math.min(ax, az) > radius) continue;
+                BlockPos inside = ax > radius ? middle.offset(dx - Integer.signum(dx), 0, dz) : middle.offset(dx, 0, dz - Integer.signum(dz));
+                if (setter.isSet(inside) && random.nextDouble() < fuzz) {
                     this.leaf(level, setter, random, tree, middle.offset(dx, 0, dz), highlight + HIGHLIGHT_FUZZ);
                 }
             }
