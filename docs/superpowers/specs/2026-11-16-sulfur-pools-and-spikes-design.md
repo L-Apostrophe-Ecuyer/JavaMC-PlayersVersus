@@ -29,8 +29,8 @@ Asked (2026-11-16), while the cypress work was finishing:
    overridden in the mod's data as its other vanilla features are (global, by the worldgen plan's decision S6).
 3. **Sulfur spikes poison and nauseate.** A sulfur spike that hurts a living thing gives it Poison I for a whole number
    of seconds from 1 to the damage dealt, and Nausea for a whole number from 5 to the damage dealt (5 when it dealt less
-   than 5), each uniformly at random. The damage dealt is what the thing took, after armour and enchantments, absorption
-   included (Fabric's "damage taken"). Undead, immune to poison, get the nausea only.
+   than 5), each uniformly at random. The damage dealt is what got through: the health and absorption the thing
+   lost, after armour, enchantments and Resistance. Undead, immune to poison, get the nausea only.
 4. **What counts as a sulfur spike hurting.** A falling sulfur spike landing on it (`falling_stalactite` from a falling
    sulfur spike), and landing on a sulfur spike: the fall damage taken coming down on one is the spike's, though vanilla
    adds none of its own. The numbers (1 and 5 seconds) are `VersusSettings.SulfurSpikes`.
@@ -51,8 +51,11 @@ Asked (2026-11-16), while the cypress work was finishing:
   rule (not `#minecraft:lava_pool_stone_cannot_replace`). The floor is scanned in the lake's box, 4 to 2 blocks below
   the origin. The game test's eight pools: 17 to 31 geysers on floors of 49 to 93 blocks.
 - **Sulfur spikes** (`SulfurSpikes`, `SulfurSpikeBlockMixin`, `VersusSettings.SulfurSpikes`): as decided. A falling
-  spike's hurt through Fabric's `ServerLivingEntityEvents.AFTER_DAMAGE` (its damage taken); landing on a spike measured
-  as the health and absorption lost around vanilla's `fallOn`.
+  spike's hurt is measured as the health and absorption lost between Fabric's `ServerLivingEntityEvents.ALLOW_DAMAGE`
+  and `AFTER_DAMAGE` (the latter's own amount comes before armour, the final review found: the first build drew from it,
+  so armour and Resistance didn't shorten the effects); landing on a spike likewise around vanilla's `fallOn`.
 - **Checks**: `SulfurGameTest` (the pools; a falling spike; landing on a spike; a fall onto plain ground, a guard that
-  passed from the start) and `SulfurSpikesTest` (2), the rest watched failing first. The gallery's scene is
+  passed from the start; after the final review, falling spikes through armour and Resistance) and `SulfurSpikesTest`
+  (2), the rest watched failing first. The final review's probe of real sulfur caves (seed 8675309, 1,352 chunks, both
+  world types): all 502 pools got geysers, none fewer than six where the floor had them, 24 a pool on average. The gallery's scene is
   `tools/gallery-sulfur.txt`.

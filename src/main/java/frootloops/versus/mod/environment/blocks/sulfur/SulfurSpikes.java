@@ -12,21 +12,36 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 /**
  * What a sulfur spike does to what it hurts: Poison for a whole number of seconds from {@code POISON_SECONDS} to the
  * damage it dealt, Nausea for one from {@code NAUSEA_SECONDS} to the damage dealt (VersusSettings.SulfurSpikes), the
- * damage being what was taken, after armour and enchantments, absorption included. A sulfur spike hurts by falling onto
- * something (vanilla's falling stalactite, heard here after the damage) and by being landed on
- * (SulfurSpikeBlockMixin: vanilla gives the fall no spike damage of its own, so the fall's is the spike's).
+ * damage being what got through: the health and absorption the hurt took, after armour, enchantments and Resistance. A
+ * sulfur spike hurts by falling onto something (vanilla's falling stalactite: what the thing had as Fabric's
+ * allow-damage hears of the hurt, against what it has as its after-damage does, whose own amount comes before armour)
+ * and by being landed on (SulfurSpikeBlockMixin: vanilla gives the fall no spike damage of its own, so the fall's is the
+ * spike's).
  */
 public final class SulfurSpikes {
 
     private SulfurSpikes() {
     }
 
+    /** What each living thing a falling sulfur spike is hurting had, health and absorption, as the hurt began. */
+    private static final Map<LivingEntity, Float> BEFORE = new WeakHashMap<>();
+
     public static void register() {
+        ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+            if (isFallingSpike(source)) BEFORE.put(entity, entity.getHealth() + entity.getAbsorptionAmount());
+            return true;
+        });
         ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamageTaken, damageTaken, blocked) -> {
-            if (damageTaken > 0.0F && isFallingSpike(source)) afflict(entity, damageTaken);
+            Float before = isFallingSpike(source) ? BEFORE.remove(entity) : null;
+            if (before == null) return;
+            float dealt = before - entity.getHealth() - entity.getAbsorptionAmount();
+            if (dealt > 0.0F) afflict(entity, dealt);
         });
     }
 

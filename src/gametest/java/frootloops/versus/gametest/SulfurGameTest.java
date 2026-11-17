@@ -119,6 +119,30 @@ public class SulfurGameTest {
         helper.succeedWhen(() -> afflictedForItsHurt(helper, pig, "the falling spike"));
     }
 
+    /**
+     * Armour and Resistance count: a falling spike's poison and nausea are drawn from the damage that got through (the
+     * health lost), not from the hit before them. Eight pigs in armour (20, toughness 8) with Resistance IV, under spikes
+     * falling ten blocks, a full 40 before armour.
+     */
+    @GameTest(structure = GROVE, maxTicks = 80, skyAccess = true)
+    public void armourAndResistanceShortenAFallingSpikesPoisonAndNausea(GameTestHelper helper) {
+        List<LivingEntity> pigs = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            int x = 4 + 5 * i;
+            LivingEntity pig = sturdyPig(helper, x + 0.5, 1.0, 30.5);
+            pig.getAttribute(Attributes.ARMOR).setBaseValue(20.0);
+            pig.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(8.0);
+            pig.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, MobEffectInstance.INFINITE_DURATION, 3));
+            pigs.add(pig);
+            helper.setBlock(new BlockPos(x, 12, 30), Blocks.STONE);
+            helper.setBlock(new BlockPos(x, 11, 30), spike(Direction.DOWN));
+            helper.getLevel().scheduleTick(helper.absolutePos(new BlockPos(x, 11, 30)), Blocks.SULFUR_SPIKE, 1);
+        }
+        helper.succeedWhen(() -> {
+            for (LivingEntity pig : pigs) afflictedForItsHurt(helper, pig, "a spike through armour and Resistance");
+        });
+    }
+
     /** Landing on a sulfur spike: the fall's hurt is the spike's, and it poisons and nauseates as one falling does. */
     @GameTest(structure = GROVE, maxTicks = 80, skyAccess = true)
     public void landingOnASulfurSpikePoisonsAndNauseates(GameTestHelper helper) {
