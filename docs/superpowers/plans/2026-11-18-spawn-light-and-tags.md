@@ -39,3 +39,9 @@
 ### Task 3: In the world
 
 - [ ] Suite, game tests, docs, a fresh final review, fixes, push.
+
+### Task 4: The pale kin's swap, lighter (the owner's choice)
+
+**Files:** `NaturalSpawnerPaleKinMixin` (`@ModifyExpressionValue`, arguments only, `require = 0`), `MobSpawning` (the two caves' code-added pale spawns go), `caves/deep_caves.json` (pale creeper 180, pale spider 40 in groups of 1–2), `caves/regular_cave.json` (120, 40); new `NaturalSpawnerPaleKinMixinTest`; `BiomeDataTest`; `SpawnRulesGameTest`.
+
+- [ ] Failing: the mixin has no `@WrapOperation` and its injections are optional; the caves' files list their pale creepers and spiders at those weights. Guard: the game's lists for the two caves hold the same weights before and after. Implement. Run the pale line game tests (the real spawner). Commit.

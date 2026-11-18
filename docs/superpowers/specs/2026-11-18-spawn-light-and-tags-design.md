@@ -64,7 +64,7 @@ what a tag nested in them already holds; one entry is listed twice; Fabric warns
   asks what a tag holds rather than which file lists it. Fabric no longer warns of untranslated item tags; the thrown
   slimeball has a name.
 
-## The pale mobs (held)
+## The pale mobs (the owner's choice)
 
 In 26.4 a biome's spawns are its `minecraft:gameplay/natural_mob_spawns` attribute, layered by dimension, biome, timeline
 and weather: nothing by height. In a Players Versus world (seed 1234, the climate sampled) no surface biome reaches below
@@ -72,3 +72,14 @@ y 0; underground, the regular cave is 68% of the caves above y 0 and 50% of thos
 for "everything below y 0 is pale" the regular cave would have to list both kinds, each refused at the wrong height, and
 the spawner keeps the kind it picks for a whole group: picks of the wrong kind for the height are lost, about a third of
 them in the regular caves. The swap costs a comparison a check and makes nothing it throws away.
+
+Asked, the owner chose to keep the swap and make it lighter:
+
+1. **No object a check.** The two `@WrapOperation`s (which make an operation object each call) become
+   `@ModifyExpressionValue`s, reading the place from the methods' own arguments (the group's start shares its height
+   with every place the group tries).
+2. **Never fatal.** Both injections are optional (`require = 0`): if another mod rewrites the spawner, the pale kin stop
+   being swapped rather than the game failing to start.
+3. **The caves' pale mobs in their biome files.** The pale creepers and spiders the code added to the deep caves and the
+   regular cave move into their biome files (the creepers merged with the files' own, same group size): the same
+   weights, read where the rest of each cave's monsters are.
