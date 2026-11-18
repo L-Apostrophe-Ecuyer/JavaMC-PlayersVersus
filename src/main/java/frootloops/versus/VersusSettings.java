@@ -282,4 +282,9 @@ public abstract class VersusSettings {
         public static int BREWS_PER_NETHER_WART = 1; // Nether wart is the brewing stand's fuel
     }
 
+    public static class Shulkers {
+        // The peek at a placed shulker box: how often the client asks for its contents while looking
+        public static int PEEK_REFRESH_TICKS = 10;
+    }
+
 }

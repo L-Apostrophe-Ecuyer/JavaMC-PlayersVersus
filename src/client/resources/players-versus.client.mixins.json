@@ -9,6 +9,9 @@
 
 		"environment.visuals.ClientWorldSkyMixin",
 		"items_and_effects.fruit.CameraSourMixin",
+		"items_and_effects.containers.AbstractContainerScreenShulkerMixin",
+		"items_and_effects.containers.MouseHandlerPeekMixin",
+		"items_and_effects.containers.MultiPlayerGameModePeekMixin",
 		"environment.visuals.DarknessFogRendererMixin",
 		"environment.visuals.WeatherRendererMixin",
 		"environment.visuals.LightmapMixin",

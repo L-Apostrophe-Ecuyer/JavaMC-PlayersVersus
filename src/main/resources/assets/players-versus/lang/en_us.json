@@ -533,5 +533,9 @@
   "tag.item.players-versus.enchantable.knockback_applicable": "Enchantable with Knockback",
   "tag.item.players-versus.enchantable.riposte_applicable": "Enchantable with Riposte",
   "tag.item.players-versus.enchantable.sweeping_applicable": "Enchantable with Sweeping Edge",
-  "tag.item.players-versus.enchantable.thorns_applicable": "Enchantable with Thorns"
+  "tag.item.players-versus.enchantable.thorns_applicable": "Enchantable with Thorns",
+  "key.players-versus.shulker_peek": "Shulker Box Peek",
+  "key.category.players-versus.controls": "Players Versus",
+  "players-versus.shulker_peek.on": "Shulker box peek: on",
+  "players-versus.shulker_peek.off": "Shulker box peek: off"
 }

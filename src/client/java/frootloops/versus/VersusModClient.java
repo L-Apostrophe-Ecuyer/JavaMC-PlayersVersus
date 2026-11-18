@@ -1,5 +1,7 @@
 package frootloops.versus;
 
+import frootloops.versus.mod.items_and_effects.containers.ContainersClient;
+
 import frootloops.versus.mod.environment.CustomSpecialEffects;
 import frootloops.versus.mod.environment.BuoyancyParticle;
 import frootloops.versus.mod.environment.SparksParticle;
@@ -49,6 +51,7 @@ public class VersusModClient implements ClientModInitializer {
 		ClientTopples.register();
 		ClientPlacement.register();
 		HotbarRefill.register();
+		ContainersClient.register();
 
 		ParticleProviderRegistry.getInstance().register(CustomSpecialEffects.SPARKS_PARTICLE, SparksParticle.Factory::new);
 		ParticleProviderRegistry.getInstance().register(CustomSpecialEffects.BUYANCY_EFFECT_PARTICLE, BuoyancyParticle.Factory::new);

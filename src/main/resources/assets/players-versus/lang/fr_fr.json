@@ -378,5 +378,9 @@
   "tag.item.players-versus.enchantable.knockback_applicable": "Enchantable avec Recul",
   "tag.item.players-versus.enchantable.riposte_applicable": "Enchantable avec Riposte",
   "tag.item.players-versus.enchantable.sweeping_applicable": "Enchantable avec Affilage",
-  "tag.item.players-versus.enchantable.thorns_applicable": "Enchantable avec Épines"
+  "tag.item.players-versus.enchantable.thorns_applicable": "Enchantable avec Épines",
+  "key.players-versus.shulker_peek": "Aperçu des boîtes de Shulker",
+  "key.category.players-versus.controls": "Players Versus",
+  "players-versus.shulker_peek.on": "Aperçu des boîtes de Shulker : activé",
+  "players-versus.shulker_peek.off": "Aperçu des boîtes de Shulker : désactivé"
 }

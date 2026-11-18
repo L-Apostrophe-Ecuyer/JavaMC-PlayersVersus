@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptio
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.GraphicsPreset;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -19,6 +20,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ChunkTrackingView;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -47,7 +49,16 @@ import java.util.Locale;
  *   <li>{@code stage:<biome id>}: the rocks that follow go in the nearest patch of the biome, one beside the other;</li>
  *   <li>{@code rock:<id>[,<seed>]}: places a rock feature's or formation's rock (as {@code /pvwg rock} does) on dry,
  *   open ground past the last one, then looks at it from the south-west and the north-east, and from above;</li>
- *   <li>{@code name:<text>}: the name of the screenshots that follow (they are numbered).</li>
+ *   <li>{@code name:<text>}: the name of the screenshots that follow (they are numbered);</li>
+ *   <li>{@code gui:}: shows the HUD (hidden at the start), or hides it again;</li>
+ *   <li>{@code hover:<menu slot>}: opens the player's inventory (not in spectator mode) and puts the cursor on that slot of
+ *   it (36 is the hotbar's first), the window at the screenshots' size;</li>
+ *   <li>{@code scroll:<amount>}: turns the mouse wheel (up is positive);</li>
+ *   <li>{@code shot:}: a screenshot of what is there now;</li>
+ *   <li>{@code close:}: closes the screen, the window small again;</li>
+ *   <li>{@code peek:[<x>,<z>[,<block>]]}: places a shulker box (the block's id, default the undyed one) with things in it on the ground there, stands the player (in survival)
+ *   two blocks south of it looking at it, and takes a screenshot of its peek, then two more as the wheel selects; with
+ *   no x and z (peek:,,&lt;block&gt;), where the player is.</li>
  * </ul>
  * {@code -Dpv.gallery.seed} (default 8675309), {@code -Dpv.gallery.preset} (default {@code players-versus:better_world}),
  * {@code -Dpv.gallery.distance} (render distance, default 10), {@code -Dpv.gallery.size} (default {@code 1280x720}).
@@ -125,6 +136,19 @@ public class WorldgenGallery implements FabricClientGameTest {
                     case "cmd" -> world.getServer().runCommand(argument);
                     case "stage" -> this.stage(world, argument.contains(":") ? argument : "minecraft:" + argument);
                     case "rock" -> this.rock(context, world, argument);
+                    case "gui" -> context.getInput().pressKey(options -> options.keyToggleGui);
+                    case "hover" -> this.hover(context, Integer.parseInt(argument));
+                    case "scroll" -> {
+                        context.getInput().scroll(Double.parseDouble(argument));
+                        context.waitTicks(2);
+                    }
+                    case "shot" -> this.shot(context, "now");
+                    case "close" -> {
+                        context.setScreen(() -> null);
+                        context.getInput().resizeWindow(320, 180);
+                        context.waitTicks(2);
+                    }
+                    case "peek" -> this.peek(context, world, argument);
                     case "name" -> {
                         this.name = argument;
                         this.count = 0;
@@ -355,5 +379,70 @@ public class WorldgenGallery implements FabricClientGameTest {
         long done = System.currentTimeMillis();
         LOGGER.info("[gallery] {} at {} {} {} facing {} {}: chunks after {} s, drawn after {} s more", file, x, y, z, yaw, pitch,
                 (downloaded - start) / 1000, (done - downloaded) / 1000);
+    }
+
+    /** The player's inventory open, the cursor on this slot of its menu; the window at the screenshots' size. */
+    private void hover(ClientGameTestContext context, int slot) {
+        context.getInput().resizeWindow(this.width, this.height);
+        context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
+        context.waitForScreen(InventoryScreen.class);
+        double[] cursor = context.computeOnClient(client -> {
+            InventoryScreen screen = (InventoryScreen) client.gui.screen();
+            Slot target = screen.getMenu().getSlot(slot);
+            double scale = (double) client.getWindow().getScreenWidth() / client.getWindow().getGuiScaledWidth();
+            // The inventory is 176 by 166, in the middle (the recipe book closed)
+            int left = (screen.width - 176) / 2, top = (screen.height - 166) / 2;
+            return new double[]{(left + target.x + 8) * scale, (top + target.y + 8) * scale};
+        });
+        context.getInput().setCursorPos(cursor[0], cursor[1]);
+        context.waitTicks(2);
+    }
+
+    private void shot(ClientGameTestContext context, String what) {
+        String file = this.name + (this.count == 0 ? "" : "_" + this.count);
+        this.count++;
+        context.takeScreenshot(TestScreenshotOptions.of(file).disableCounterPrefix().withSize(this.width, this.height));
+        LOGGER.info("[gallery] {}: {}", file, what);
+    }
+
+    /** A shulker box on the ground at x, z, the player two blocks south looking at it: its peek, then two turns of the wheel. */
+    private void peek(ClientGameTestContext context, TestSingleplayerContext world, String argument) {
+        int x, z;
+        String[] parts = argument.split(",");
+        String block = parts.length > 2 ? parts[2].trim() : "minecraft:shulker_box";
+        if (parts.length < 2 || parts[0].isBlank()) {
+            // Where the player is
+            BlockPos at = context.computeOnClient(client -> client.player.blockPosition());
+            x = at.getX();
+            z = at.getZ();
+        } else {
+            x = Integer.parseInt(parts[0].trim());
+            z = Integer.parseInt(parts[1].trim());
+        }
+        int y = this.ground(world, x, z);
+        world.getServer().runCommand(String.format(Locale.ROOT, "setblock %d %d %d %s{Items:[%s]}", x, y, z, block, String.join(",",
+                "{Slot:0b,id:\"minecraft:diamond\",count:12}", "{Slot:2b,id:\"minecraft:golden_apple\",count:3}",
+                "{Slot:4b,id:\"minecraft:torch\",count:64}", "{Slot:10b,id:\"minecraft:ender_pearl\",count:16}",
+                "{Slot:13b,id:\"minecraft:bread\",count:20}", "{Slot:22b,id:\"minecraft:iron_ingot\",count:30}",
+                "{Slot:26b,id:\"minecraft:oak_log\",count:48}")));
+        world.getServer().runCommand("gamemode survival @p");
+        world.getServer().runCommand(String.format(Locale.ROOT, "tp @p %.1f %d %.1f 180 -90", x + 0.5, y, z + 2.5));
+        context.waitTicks(5);
+        context.waitFor(WorldgenGallery::chunksArrived, CHUNK_TIMEOUT);
+        context.getInput().lookAt(new BlockPos(x, y, z));
+        context.waitTicks(5);
+        context.waitFor(client -> client.levelRenderer.hasRenderedAllSections(), CHUNK_TIMEOUT);
+        // The peek's question and the server's answer; then the window at the screenshots' size, the HUD laid out for it
+        context.waitTicks(20);
+        context.getInput().resizeWindow(this.width, this.height);
+        context.waitTicks(2);
+        this.shot(context, "the peek at " + x + " " + y + " " + z);
+        context.getInput().scroll(-1);
+        context.waitTicks(2);
+        this.shot(context, "the peek, the first item selected");
+        context.getInput().scroll(-1);
+        context.waitTicks(2);
+        this.shot(context, "the peek, the second item selected");
+        context.getInput().resizeWindow(320, 180);
     }
 }
