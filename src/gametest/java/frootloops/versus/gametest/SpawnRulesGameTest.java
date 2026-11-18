@@ -251,10 +251,10 @@ public class SpawnRulesGameTest {
      * The spawn check reads the sky's light once and works out darkness from it (MobSpawning.darkEnoughToSpawn): the
      * same answer as vanilla's own check (Monster.isDarkEnoughToSpawn), place by place and seed by seed: in a dark room
      * (vanilla always lets a monster spawn), one lit by a torch (never), a tunnel the sky's light fades down (by chance,
-     * both draws), and the open. Once the light has settled over what was built.
+     * both draws), and the open. Once the light has settled over what was built, and once {@code ready} holds (the
+     * weather, the hour).
      */
-    @GameTest(structure = GROVE, maxTicks = 200, skyAccess = true)
-    public void theDarknessCheckIsVanillas(GameTestHelper helper) {
+    private static void darknessIsVanillas(GameTestHelper helper, java.util.function.BooleanSupplier ready, String notReady) {
         ServerLevel level = helper.getLevel();
         BlockPos dark = room(helper, new BlockPos(4, 2, 4), 5, 3, Blocks.STONE, Blocks.STONE);
         room(helper, new BlockPos(4, 2, 14), 5, 3, Blocks.STONE, Blocks.STONE);
@@ -276,6 +276,7 @@ public class SpawnRulesGameTest {
         for (int x = 20; x <= 40; x++) places.add(helper.absolutePos(new BlockPos(x, 1, 20)));
         for (int x = 30; x < 36; x++) places.add(helper.absolutePos(new BlockPos(x, 1, 34)));
         helper.succeedWhen(() -> {
+            helper.assertTrue(ready.getAsBoolean(), notReady);
             helper.assertTrue(level.getBrightness(LightLayer.SKY, dark) == 0 && level.getBrightness(LightLayer.BLOCK, helper.absolutePos(new BlockPos(5, 2, 15))) > 0,
                     "the light hasn't settled yet");
             Set<Integer> skies = new java.util.TreeSet<>();
@@ -287,12 +288,30 @@ public class SpawnRulesGameTest {
                     boolean ours = MobSpawning.darkEnoughToSpawn(level, pos, net.minecraft.util.RandomSource.create(seed), sky);
                     boolean vanilla = net.minecraft.world.entity.monster.Monster.isDarkEnoughToSpawn(level, pos, net.minecraft.util.RandomSource.create(seed));
                     helper.assertTrue(ours == vanilla, "at " + pos.toShortString() + " (sky " + sky + ", block " + level.getBrightness(LightLayer.BLOCK, pos)
-                            + "), seed " + seed + ": " + ours + " against vanilla's " + vanilla);
+                            + ", sky darkened " + level.getSkyDarken() + (level.isThundering() ? ", thundering" : "") + "), seed " + seed + ": " + ours + " against vanilla's " + vanilla);
                     if (vanilla) allowed++;
                     else refused++;
                 }
             }
             helper.assertTrue(skies.size() >= 10 && allowed > 0 && refused > 0, "too little tried: skies " + skies + ", " + allowed + " allowed, " + refused + " refused");
         });
+    }
+
+    /** By day in clear weather: the sky's light not darkened. */
+    @GameTest(structure = GROVE, maxTicks = 200, skyAccess = true)
+    public void theDarknessCheckIsVanillas(GameTestHelper helper) {
+        darknessIsVanillas(helper, () -> true, "");
+    }
+
+    /** At midnight: the sky's light darkened (the darkening term of the brightness). */
+    @GameTest(structure = GROVE, maxTicks = 200, skyAccess = true, environment = "players-versus-gametest:midnight")
+    public void theDarknessCheckIsVanillasAtMidnight(GameTestHelper helper) {
+        darknessIsVanillas(helper, () -> helper.getLevel().getSkyDarken() > 0, "the sky isn't darkened at midnight yet");
+    }
+
+    /** In a thunderstorm: vanilla darkens the sky's light by 10 for its brightness test (the thunder branch). */
+    @GameTest(structure = GROVE, maxTicks = 400, skyAccess = true, environment = "players-versus-gametest:thunder")
+    public void theDarknessCheckIsVanillasInAThunderstorm(GameTestHelper helper) {
+        darknessIsVanillas(helper, () -> helper.getLevel().isThundering(), "no thunder yet");
     }
 }
