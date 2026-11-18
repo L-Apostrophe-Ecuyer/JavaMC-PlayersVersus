@@ -5,8 +5,8 @@
 
 The lemon (item: its texture, model and item definition), Sour's effect icon (a lemon slice) and their names in every
 language file. Nothing grows lemons now: the lemon trees of earlier versions (stripped oak logs under lemon leaves) and
-the two-block lemon bushes that followed them are gone. The helpers here (write_json, add_to_tag, add_names) are
-tools/cypress.py's too.
+the two-block lemon bushes that followed them are gone. The helpers here (write_json, add_names) are tools/cypress.py's
+too; tags are written with tools/tagfiles.py.
 """
 import json
 import os
@@ -90,18 +90,6 @@ def assets():
     models = f"{MOD}/models"
     write_json(ASSETS, f"{models}/item/lemon.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/lemon"}})
     write_json(ASSETS, f"{MOD}/items/lemon.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/lemon"}})
-
-
-def add_to_tag(path, *values):
-    full = os.path.join(DATA, path)
-    tag = {"replace": False, "values": []}
-    if os.path.exists(full):
-        with open(full) as file:
-            tag = json.load(file)
-    for value in values:
-        if value not in tag["values"]:
-            tag["values"].append(value)
-    write_json(DATA, path, tag)
 
 
 NAMES = {

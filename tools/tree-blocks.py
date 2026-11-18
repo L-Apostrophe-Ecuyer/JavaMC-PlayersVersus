@@ -89,8 +89,8 @@ def tags():
     """The vanilla tags that list each wood's log by name rather than through its wood's tag."""
     trees = [f"{MOD}:{name}_tree" for name in WOODS]
     write("data/minecraft/tags/block/overworld_natural_logs.json", {"replace": False, "values": trees})
-    write("data/minecraft/tags/block/prevents_nearby_leaf_decay.json", {"replace": False, "values": trees})
-    write("data/minecraft/tags/block/supports_cocoa.json", {"replace": False, "values": [f"{MOD}:jungle_tree"]})
+    # Nothing to add to prevents_nearby_leaf_decay (vanilla's is #logs) nor supports_cocoa (#jungle_logs): each tree block
+    # is in its wood's logs tag above, and so in both
 
 
 if __name__ == "__main__":

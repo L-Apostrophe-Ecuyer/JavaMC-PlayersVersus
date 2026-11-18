@@ -22,6 +22,7 @@ import os
 import sys
 
 import animals
+from tagfiles import add_to_tag, use_vanilla
 
 MOD = "players-versus"
 DATA = os.path.join("src", "main", "resources", "data")
@@ -406,21 +407,10 @@ def make(vanilla, name, spec):
         write_json(f"{MOD}/worldgen/placed_feature/{extra_name}.json", placed)
 
 
-def add_to_tag(path, *values):
-    full = os.path.join(DATA, path)
-    tag = {"replace": False, "values": []}
-    if os.path.exists(full):
-        with open(full) as file:
-            tag = json.load(file)
-    for value in values:
-        if value not in tag["values"]:
-            tag["values"].append(value)
-    write_json(path, tag)
-
-
 def inherit_tags(vanilla, parent, child, skip=()):
     """Adds `child` to every biome tag (the game's and the mod's, by file) that holds `parent`: the structures, mobs and
-    the rest of what makes the parent what it is; but the tags in `skip` (their paths under tags/worldgen/biome)."""
+    the rest of what makes the parent what it is; but the tags in `skip` (their paths under tags/worldgen/biome), and the
+    climate variants, which tools/animals.py decides (tagfiles.OWNED)."""
     found = []
     for root in [os.path.join(vanilla, "data"), DATA]:
         base = os.path.join(root, "minecraft", "tags", "worldgen", "biome")
@@ -489,6 +479,7 @@ NAMES = {
 
 
 def main(vanilla):
+    use_vanilla(vanilla)
     cypress()
     great_oak()
     sub_biome_ground(vanilla)

@@ -1,7 +1,6 @@
 {
   "replace": true,
   "values": [
-
     "players-versus:critical_strike",
     "players-versus:sprinting_strike",
     "players-versus:tossing",
@@ -13,7 +12,6 @@
     "minecraft:projectile_protection",
     "minecraft:blast_protection",
     "minecraft:fire_protection",
-
     "minecraft:respiration",
     "minecraft:aqua_affinity",
     "minecraft:thorns",

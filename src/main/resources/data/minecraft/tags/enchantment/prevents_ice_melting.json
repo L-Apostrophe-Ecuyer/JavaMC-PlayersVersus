@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "minecraft:silk_touch",
     "players-versus:frost_aspect"
   ]
 }

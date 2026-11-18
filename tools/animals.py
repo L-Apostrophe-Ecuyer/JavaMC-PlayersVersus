@@ -70,9 +70,9 @@ WARM = ["desert_oasis", "tuscan_grove", "rocky_plains", "warm_oak_forest", "dark
 COLD = ["cold_plains", "cold_taiga", "cold_beach", "rocky_snowy_plains", "birch_taiga_forest", "dappled_taiga", "sparse_dappled_forest",
         "dark_taiga_forest", "pale_taiga", "mixed_forest", "rocky_birch_forest", "cold_swamp"]
 COLD_FROGS = ["cold_swamp", "cold_plains", "cold_taiga", "cold_beach", "rocky_snowy_plains"]
-# Wolves' coats: woods in the forests, rusty toward the jungles (the rocky jungle is a jungle already), ashen in the cold,
-# chestnut by the old taigas; the others' wolves are pale (the game's default)
-WOLF_COATS = {"woods": ["forest_edge", "old_oak_forest", "humid_oak_forest", "mixed_forest"], "rusty": ["mountainside_jungle"],
+# Wolves' coats: woods in the forests, ashen in the cold, chestnut by the old taigas; rusty toward the jungles is vanilla's
+# own (#is_jungle, which the rocky and mountainside jungles are in); the others' wolves are pale (the game's default)
+WOLF_COATS = {"woods": ["forest_edge", "old_oak_forest", "humid_oak_forest", "mixed_forest"],
               "ashen": ["cold_taiga", "cold_plains", "rocky_snowy_plains"], "chestnut": ["pale_taiga", "dark_taiga_forest"]}
 
 

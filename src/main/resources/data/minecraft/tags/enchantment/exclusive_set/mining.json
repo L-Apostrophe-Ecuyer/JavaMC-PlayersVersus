@@ -1,8 +1,6 @@
 {
   "replace": false,
   "values": [
-    "minecraft:fortune",
-    "minecraft:silk_touch",
     "minecraft:fire_aspect",
     "players-versus:frost_aspect"
   ]

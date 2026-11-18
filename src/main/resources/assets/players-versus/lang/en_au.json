@@ -511,5 +511,16 @@
   "biome.players-versus.rocky_snowy_plains": "Rocky Snowy Plains",
 
 
-  "block.players-versus.cypress_leaves": "Cypress Leaves"
+  "block.players-versus.cypress_leaves": "Cypress Leaves",
+
+  "entity.players-versus.slimeball": "Slimeball",
+  "tag.item.players-versus.sweep_weapons": "Sweeping Weapons",
+  "tag.item.players-versus.sprint_weapons": "Sprinting Weapons",
+  "tag.item.players-versus.critical_weapons": "Critical Weapons",
+  "tag.item.players-versus.piercing_weapons": "Piercing Weapons",
+  "tag.item.players-versus.copper_tool_materials": "Copper Tool Materials",
+  "tag.item.players-versus.enchantable.knockback_applicable": "Enchantable with Knockback",
+  "tag.item.players-versus.enchantable.riposte_applicable": "Enchantable with Riposte",
+  "tag.item.players-versus.enchantable.sweeping_applicable": "Enchantable with Sweeping Edge",
+  "tag.item.players-versus.enchantable.thorns_applicable": "Enchantable with Thorns"
 }

@@ -216,9 +216,9 @@ class BiomeDataTest {
         assertEquals(theirs, ours, "the mangrove swamp changes more than its foliage colour");
     }
 
-    private static boolean tagged(String tag, String biome) throws IOException {
-        Path file = DATA.resolve(tag);
-        return Files.exists(file) && read(file).getAsJsonArray("values").contains(new com.google.gson.JsonPrimitive("players-versus:" + biome));
+    /** Whether the biome tag (its file's path) holds the biome, as the game merges the mod's file with its own. */
+    private static boolean tagged(String tag, String biome) {
+        return frootloops.versus.TagFiles.biomeTagHolds(tag, biome);
     }
 
     /**
@@ -374,9 +374,10 @@ class BiomeDataTest {
         for (String cold : List.of("cold_swamp", "cold_plains", "cold_taiga", "rocky_snowy_plains")) {
             assertTrue(tagged(tags + "spawns_cold_variant_frogs.json", cold), cold + "'s frogs aren't the cold ones");
         }
+        // Rusty toward the jungles is vanilla's own coat, by #is_jungle: the mountainside jungle is one
+        assertTrue(tagged(tags + "is_jungle.json", "mountainside_jungle"), "the mountainside jungle isn't a jungle (no rusty wolves)");
         Map<String, List<String>> coats = Map.of("woods", List.of("forest_edge", "old_oak_forest", "humid_oak_forest", "mixed_forest"),
-                "rusty", List.of("mountainside_jungle"), "ashen", List.of("cold_taiga", "cold_plains", "rocky_snowy_plains"),
-                "chestnut", List.of("pale_taiga", "dark_taiga_forest"));
+                "ashen", List.of("cold_taiga", "cold_plains", "rocky_snowy_plains"), "chestnut", List.of("pale_taiga", "dark_taiga_forest"));
         for (Map.Entry<String, List<String>> coat : coats.entrySet()) {
             Path file = DATA.resolve("minecraft/wolf_variant/" + coat.getKey() + ".json");
             assertTrue(Files.exists(file), "the " + coat.getKey() + " wolves have no override");
@@ -452,14 +453,12 @@ class BiomeDataTest {
 
     @Test
     void theNewBiomesExistAreTaggedAndNamed() throws IOException {
-        JsonArray overworld = read(DATA.resolve("minecraft/tags/worldgen/biome/is_overworld.json")).getAsJsonArray("values");
-        JsonArray mineshafts = read(DATA.resolve("minecraft/tags/worldgen/biome/has_structure/mineshaft.json")).getAsJsonArray("values");
         JsonObject english = read(ASSETS.resolve("en_us.json")), french = read(ASSETS.resolve("fr_fr.json"));
         for (String name : NEW_BIOMES) {
             String id = "players-versus:" + name;
             assertTrue(Files.exists(DATA.resolve("players-versus/worldgen/biome/" + name + ".json")), name + " has no biome file");
-            assertTrue(overworld.contains(new com.google.gson.JsonPrimitive(id)), name + " isn't in is_overworld");
-            assertTrue(mineshafts.contains(new com.google.gson.JsonPrimitive(id)), name + " isn't in has_structure/mineshaft");
+            assertTrue(tagged("minecraft/tags/worldgen/biome/is_overworld.json", name), name + " isn't in is_overworld");
+            assertTrue(tagged("minecraft/tags/worldgen/biome/has_structure/mineshaft.json", name), name + " isn't in has_structure/mineshaft");
             assertTrue(english.has("biome.players-versus." + name), name + " has no English name");
             assertTrue(french.has("biome.players-versus." + name), name + " has no French name");
         }

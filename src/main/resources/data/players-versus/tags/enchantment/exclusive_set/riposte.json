@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "minecraft:sweeping_edge",
     "players-versus:riposte"

@@ -17,6 +17,22 @@
     "minecraft:sandstone",
     "minecraft:red_sandstone",
     "players-versus:gray_clay",
-    "players-versus:brown_clay"
+    "players-versus:brown_clay",
+    "#minecraft:coal_ores",
+    "#minecraft:copper_ores",
+    "#minecraft:iron_ores",
+    "#minecraft:gold_ores",
+    "#minecraft:redstone_ores",
+    "#minecraft:lapis_ores",
+    "#minecraft:diamond_ores",
+    "#minecraft:emerald_ores",
+    "minecraft:infested_stone",
+    "minecraft:infested_deepslate",
+    "minecraft:raw_iron_block",
+    "minecraft:raw_copper_block",
+    "minecraft:suspicious_gravel",
+    "minecraft:blue_ice",
+    "minecraft:sulfur",
+    "minecraft:cinnabar"
   ]
 }

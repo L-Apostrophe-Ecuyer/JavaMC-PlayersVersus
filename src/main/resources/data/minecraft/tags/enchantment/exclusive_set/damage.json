@@ -1,12 +1,6 @@
 {
   "replace": false,
   "values": [
-    "minecraft:sharpness",
-    "minecraft:smite",
-    "minecraft:bane_of_arthropods",
-    "minecraft:impaling",
-    "minecraft:density",
-    "minecraft:breach",
     "players-versus:critical_strike"
   ]
 }

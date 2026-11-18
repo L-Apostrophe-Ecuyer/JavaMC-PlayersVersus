@@ -356,5 +356,16 @@
   "biome.players-versus.rocky_snowy_plains": "Plaines enneigées rocheuses",
 
 
-  "block.players-versus.cypress_leaves": "Feuilles de cyprès"
+  "block.players-versus.cypress_leaves": "Feuilles de cyprès",
+
+  "entity.players-versus.slimeball": "Boule de slime",
+  "tag.item.players-versus.sweep_weapons": "Armes de balayage",
+  "tag.item.players-versus.sprint_weapons": "Armes de course",
+  "tag.item.players-versus.critical_weapons": "Armes critiques",
+  "tag.item.players-versus.piercing_weapons": "Armes perforantes",
+  "tag.item.players-versus.copper_tool_materials": "Matériaux d'outils en cuivre",
+  "tag.item.players-versus.enchantable.knockback_applicable": "Enchantable avec Recul",
+  "tag.item.players-versus.enchantable.riposte_applicable": "Enchantable avec Riposte",
+  "tag.item.players-versus.enchantable.sweeping_applicable": "Enchantable avec Affilage",
+  "tag.item.players-versus.enchantable.thorns_applicable": "Enchantable avec Épines"
 }

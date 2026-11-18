@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "players-versus:turned_undead",
     "players-versus:watched"

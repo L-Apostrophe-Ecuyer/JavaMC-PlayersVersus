@@ -16,7 +16,8 @@ import sys
 
 from PIL import Image
 
-from lemons import ASSETS, DATA, MOD, add_names, add_to_tag, write_json
+from lemons import ASSETS, DATA, MOD, add_names, write_json
+from tagfiles import add_to_tag, use_vanilla
 
 
 def luminance(colour):
@@ -59,6 +60,7 @@ def main(vanilla):
     table["random_sequence"] = f"{MOD}:blocks/cypress_leaves"
     write_json(DATA, f"{MOD}/loot_table/blocks/cypress_leaves.json", table)
 
+    use_vanilla(vanilla)
     add_to_tag("minecraft/tags/block/leaves.json", f"{MOD}:cypress_leaves")
     add_to_tag("minecraft/tags/item/leaves.json", f"{MOD}:cypress_leaves")
     add_names({"en": {"block.players-versus.cypress_leaves": "Cypress Leaves"},

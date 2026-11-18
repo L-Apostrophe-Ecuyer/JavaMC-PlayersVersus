@@ -241,6 +241,7 @@ NAMES = {"en": {"biome.players-versus.cold_swamp": "Cold Swamp", "biome.players-
 
 
 def main(vanilla):
+    transition.use_vanilla(vanilla)
     marsh()
     clearings(vanilla)
     swamp()

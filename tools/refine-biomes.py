@@ -27,6 +27,7 @@ import os
 import sys
 
 import animals
+from tagfiles import set_tag, use_vanilla
 
 MOD = "players-versus"
 DATA = os.path.join("src", "main", "resources", "data")
@@ -163,15 +164,6 @@ def vanilla_biome(vanilla, name):
     return read_json(os.path.join(vanilla, "data", "minecraft", "worldgen", "biome", name.split(":")[1] + ".json"))
 
 
-def add_to_tag(path, *values):
-    full = os.path.join(DATA, path)
-    tag = read_json(full) if os.path.exists(full) else {"replace": False, "values": []}
-    for value in values:
-        if value not in tag["values"]:
-            tag["values"].append(value)
-    write_json(path, tag)
-
-
 def mobs(vanilla):
     for name in HAND_MADE:
         path = os.path.join(DATA, MOD, "worldgen", "biome", name + ".json")
@@ -180,10 +172,11 @@ def mobs(vanilla):
         write_json(f"{MOD}/worldgen/biome/{name}.json", biome)
     tags = "minecraft/tags/worldgen/biome"
     warm, cold = [f"{MOD}:{name}" for name in animals.WARM], [f"{MOD}:{name}" for name in animals.COLD]
-    add_to_tag(f"{tags}/spawns_warm_variant_farm_animals.json", *warm)
-    add_to_tag(f"{tags}/spawns_warm_variant_frogs.json", *warm)
-    add_to_tag(f"{tags}/spawns_cold_variant_farm_animals.json", *cold)
-    add_to_tag(f"{tags}/spawns_cold_variant_frogs.json", *[f"{MOD}:{name}" for name in animals.COLD_FROGS])
+    # The climate variants are the table's, whole (less what vanilla's tags hold already: a jungle by #is_jungle)
+    set_tag(f"{tags}/spawns_warm_variant_farm_animals.json", warm)
+    set_tag(f"{tags}/spawns_warm_variant_frogs.json", warm)
+    set_tag(f"{tags}/spawns_cold_variant_farm_animals.json", cold)
+    set_tag(f"{tags}/spawns_cold_variant_frogs.json", [f"{MOD}:{name}" for name in animals.COLD_FROGS])
     for coat, biomes in animals.WOLF_COATS.items():
         variant = read_json(os.path.join(vanilla, "data", "minecraft", "wolf_variant", coat + ".json"))
         variant["spawn_conditions"].append({"condition": {"type": "minecraft:biome", "biomes": [f"{MOD}:{name}" for name in biomes]}, "priority": 1})
@@ -241,6 +234,7 @@ def undergrowth():
 
 
 def main(vanilla):
+    use_vanilla(vanilla)
     riverbanks()
     undergrowth()
     mobs(vanilla)
