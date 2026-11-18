@@ -2,6 +2,7 @@ package frootloops.versus.mod.items_and_effects.containers;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -31,5 +32,16 @@ class PeekRulesTest {
     void aPeekTakesNothingWithSomethingInTheHand() {
         // The wheel and the use stay the game's (the hotbar's wheel, placing and using what is held)
         assertFalse(PeekRules.takesInput(true, true, false, false, false, false));
+    }
+
+    @Test
+    void theHotbarKeepsAScrollItBegan() {
+        // The wheel goes on moving the hotbar until it has rested from it half a second
+        int rest = frootloops.versus.VersusSettings.Shulkers.PEEK_WHEEL_REST_TICKS;
+        assertEquals(10, rest);
+        assertFalse(PeekRules.takesWheel(true, 0), "the hotbar just scrolled");
+        assertFalse(PeekRules.takesWheel(true, rest - 1), "the hotbar scrolled a moment ago");
+        assertTrue(PeekRules.takesWheel(true, rest), "the wheel has rested from the hotbar");
+        assertFalse(PeekRules.takesWheel(false, 1000), "the peek takes no input");
     }
 }

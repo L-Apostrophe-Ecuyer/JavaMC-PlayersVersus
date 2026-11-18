@@ -283,8 +283,11 @@ public abstract class VersusSettings {
     }
 
     public static class Shulkers {
-        // The peek at a placed shulker box: how often the client asks for its contents while looking
+        // The peek at a placed shulker box: how often the client asks for its contents while looking; how long the wheel
+        // must rest from the hotbar before the peek takes it; how long a slip of the crosshair off the box is forgiven
         public static int PEEK_REFRESH_TICKS = 10;
+        public static int PEEK_WHEEL_REST_TICKS = 10;
+        public static int PEEK_SLIP_TICKS = 4;
     }
 
 }

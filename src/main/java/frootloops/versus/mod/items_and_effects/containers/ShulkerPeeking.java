@@ -7,7 +7,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
@@ -52,20 +51,46 @@ public final class ShulkerPeeking {
         return ItemContainerContents.fromItems(items);
     }
 
-    /** Takes the stack in this slot into the player's inventory, as much as has room, if it is still this item; how many. */
-    public static int take(ServerPlayer player, BlockPos pos, int slot, Item item) {
+    /**
+     * Takes the stack in this slot into the player's inventory, as much as has room, if it is still the stack the player
+     * saw there (its item and components; its count may have changed); how many. The held slot is kept free if it can be.
+     */
+    public static int take(ServerPlayer player, BlockPos pos, int slot, ItemStack seen) {
         Optional<ShulkerBoxBlockEntity> openable = openable(player, pos);
         if (openable.isEmpty()) return 0;
         ShulkerBoxBlockEntity box = openable.get();
         if (slot < 0 || slot >= box.getContainerSize()) return 0;
         ItemStack held = box.getItem(slot);
-        if (held.isEmpty() || !held.is(item)) return 0;
+        if (held.isEmpty() || !ItemStack.isSameItemSameComponents(held, seen)) return 0;
         int taken = Math.min(held.getCount(), room(player.getInventory(), held));
         if (taken <= 0) return 0;
-        // Only what has room, so that nothing is lost (a full inventory with infinite materials would delete the rest)
-        player.getInventory().add(box.removeItem(slot, taken));
+        give(player.getInventory(), box.removeItem(slot, taken));
         player.level().playSound(null, pos, SoundEvents.BUNDLE_REMOVE_ONE, SoundSource.BLOCKS, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
         return taken;
+    }
+
+    /**
+     * Puts a stack the inventory has room for into it as the game would (onto stacks of the same item, then the first free
+     * slot), but past the held slot, so that the hand stays empty and the peek with it; the held slot only if nothing else
+     * has room. (Vanilla's Inventory.add puts it in the first free slot, often the held one.)
+     */
+    private static void give(Inventory inventory, ItemStack stack) {
+        List<ItemStack> items = inventory.getNonEquipmentItems();
+        int most = Math.min(stack.getMaxStackSize(), inventory.getMaxStackSize(stack));
+        for (int i = 0; i < items.size() && !stack.isEmpty(); i++) {
+            ItemStack there = items.get(i);
+            if (!there.isEmpty() && ItemStack.isSameItemSameComponents(there, stack) && there.getCount() < most) {
+                int moved = Math.min(stack.getCount(), most - there.getCount());
+                there.grow(moved);
+                stack.shrink(moved);
+            }
+        }
+        int held = inventory.getSelectedSlot();
+        for (int i = 0; i < items.size() && !stack.isEmpty(); i++) {
+            if (i != held && items.get(i).isEmpty()) inventory.setItem(i, stack.split(most));
+        }
+        if (!stack.isEmpty() && items.get(held).isEmpty()) inventory.setItem(held, stack.split(most));
+        inventory.setChanged();
     }
 
     /** How many of this stack the player's inventory (its 36 slots, not the armour's) has room for. */

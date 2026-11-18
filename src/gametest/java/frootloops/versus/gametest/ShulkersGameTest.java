@@ -390,7 +390,7 @@ public class ShulkersGameTest {
             boxAt(helper, box).applyComponentsFromItemStack(lock);
             boxAt(helper, box).setItem(2, new ItemStack(Items.DIAMOND, 3));
             helper.assertTrue(ShulkerPeeking.contents(player, box).isEmpty(), "a box locked to a key the player hasn't should show nothing");
-            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, Items.DIAMOND), 0, "taken from a locked box");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.DIAMOND)), 0, "taken from a locked box");
             boxAt(helper, unrolled).setLootTable(BuiltInLootTables.SIMPLE_DUNGEON);
             standBy(player, unrolled, 2.0);
             helper.assertTrue(ShulkerPeeking.contents(player, unrolled).isEmpty(), "a box with a loot table still to roll should show nothing");
@@ -405,7 +405,7 @@ public class ShulkersGameTest {
         withPlayer(helper, player -> {
             standBy(player, box, 2.0);
             helper.assertTrue(ShulkerPeeking.contents(player, box).isEmpty(), "a box that can't open should show nothing");
-            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, Items.DIAMOND), 0, "taken from a box that can't open");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.DIAMOND)), 0, "taken from a box that can't open");
         });
     }
 
@@ -414,7 +414,7 @@ public class ShulkersGameTest {
         BlockPos box = placeBox(helper, BOX, 2, Items.DIAMOND, 3, 5, Items.EMERALD, 7);
         withPlayer(helper, player -> {
             standBy(player, box, 2.0);
-            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, Items.DIAMOND), 3, "diamonds taken");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.DIAMOND)), 3, "diamonds taken");
             helper.assertTrue(boxAt(helper, box).getItem(2).isEmpty(), "the box's diamonds should be gone");
             helper.assertValueEqual(player.getInventory().countItem(Items.DIAMOND), 3, "diamonds in the inventory");
             assertHolds(helper, boxAt(helper, box).getItem(5), Items.EMERALD, 7, "the box's emeralds");
@@ -429,7 +429,7 @@ public class ShulkersGameTest {
         withPlayer(helper, player -> {
             standBy(player, box, 2.0);
             for (int slot = 1; slot < 36; slot++) player.getInventory().setItem(slot, new ItemStack(Items.STONE, 64));
-            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, Items.DIAMOND), 64, "diamonds taken");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.DIAMOND)), 64, "diamonds taken");
             helper.assertTrue(boxAt(helper, box).getItem(2).isEmpty(), "the box's diamonds should be gone");
             helper.assertValueEqual(player.getInventory().countItem(Items.DIAMOND), 64, "diamonds in the inventory");
             helper.assertTrue(player.getInventory().getItem(0).is(Items.DIAMOND), "the diamonds should be in the held slot");
@@ -441,11 +441,11 @@ public class ShulkersGameTest {
         BlockPos box = placeBox(helper, BOX, 2, Items.DIAMOND, 3);
         withPlayer(helper, player -> {
             standBy(player, box, 2.0);
-            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, Items.EMERALD), 0, "taken when the slot holds something else");
-            helper.assertValueEqual(ShulkerPeeking.take(player, box, 5, Items.DIAMOND), 0, "taken from an empty slot");
-            helper.assertValueEqual(ShulkerPeeking.take(player, box, 40, Items.DIAMOND), 0, "taken from a slot past the box's");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.EMERALD)), 0, "taken when the slot holds something else");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 5, new ItemStack(Items.DIAMOND)), 0, "taken from an empty slot");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 40, new ItemStack(Items.DIAMOND)), 0, "taken from a slot past the box's");
             standBy(player, box, 9.0);
-            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, Items.DIAMOND), 0, "taken out of reach");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.DIAMOND)), 0, "taken out of reach");
             assertHolds(helper, boxAt(helper, box).getItem(2), Items.DIAMOND, 3, "the box's diamonds");
         });
     }
@@ -509,7 +509,7 @@ public class ShulkersGameTest {
                 border.setCenter(box.getX() + 1000, box.getZ() + 1000);
                 border.setSize(16);
                 helper.assertTrue(ShulkerPeeking.contents(player, box).isEmpty(), "a box past the world border should show nothing");
-                helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, Items.DIAMOND), 0, "taken past the world border");
+                helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.DIAMOND)), 0, "taken past the world border");
             } finally {
                 border.setCenter(centerX, centerZ);
                 border.setSize(size);
@@ -526,7 +526,7 @@ public class ShulkersGameTest {
             standBy(player, box, 2.0);
             player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIRT, 5));
             helper.assertTrue(ShulkerPeeking.contents(player, box).isEmpty(), "a peek with something in the hand should show nothing");
-            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, Items.DIAMOND), 0, "taken with something in the hand");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.DIAMOND)), 0, "taken with something in the hand");
             assertHolds(helper, boxAt(helper, box).getItem(2), Items.DIAMOND, 3, "the box's diamonds");
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             helper.assertTrue(ShulkerPeeking.contents(player, box).isPresent(), "an empty hand should see the box");
@@ -545,5 +545,40 @@ public class ShulkersGameTest {
         helper.assertValueEqual(redTooltip.color(), ShulkerColors.of(DyeColor.RED), "the red box's colour");
         helper.assertValueEqual(plainTooltip.color(), ShulkerColors.of(null), "the undyed box's colour");
         helper.succeed();
+    }
+
+    // The peek, refined: the held slot kept free, the whole stack seen
+
+    @GameTest
+    public void aTakeKeepsTheHeldSlotFree(GameTestHelper helper) {
+        BlockPos box = placeBox(helper, BOX, 2, Items.DIAMOND, 3, 5, Items.EMERALD, 7);
+        withPlayer(helper, player -> {
+            standBy(player, box, 2.0);
+            // The hand holds slot 0, the inventory empty: the game's own order would put the diamonds in the hand
+            player.getInventory().setSelectedSlot(0);
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.DIAMOND)), 3, "diamonds taken");
+            helper.assertTrue(player.getMainHandItem().isEmpty(), "the hand should stay empty, held " + player.getMainHandItem());
+            assertHolds(helper, player.getInventory().getItem(1), Items.DIAMOND, 3, "the first free slot past the held one");
+            // Onto a stack of the same item first, wherever it is
+            player.getInventory().setSelectedSlot(4);
+            player.getInventory().setItem(20, new ItemStack(Items.EMERALD, 10));
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 5, new ItemStack(Items.EMERALD)), 7, "emeralds taken");
+            assertHolds(helper, player.getInventory().getItem(20), Items.EMERALD, 17, "the emeralds' own stack");
+            helper.assertTrue(player.getMainHandItem().isEmpty(), "the hand should stay empty");
+        });
+    }
+
+    @GameTest
+    public void takingAnotherOfTheSameKindTakesNothing(GameTestHelper helper) {
+        BlockPos box = placeBox(helper, BOX);
+        ItemStack named = new ItemStack(Items.DIAMOND, 3);
+        named.set(DataComponents.CUSTOM_NAME, Component.literal("The heirloom"));
+        withPlayer(helper, player -> {
+            standBy(player, box, 2.0);
+            boxAt(helper, box).setItem(2, named.copy());
+            // The player saw plain diamonds there; the heirloom came since
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, new ItemStack(Items.DIAMOND)), 0, "taken when the stack differs from the one seen");
+            helper.assertValueEqual(ShulkerPeeking.take(player, box, 2, named.copyWithCount(1)), 3, "taken when it is the one seen (whatever its count)");
+        });
     }
 }

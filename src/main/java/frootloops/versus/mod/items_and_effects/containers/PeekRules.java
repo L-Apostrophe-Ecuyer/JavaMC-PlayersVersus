@@ -1,5 +1,7 @@
 package frootloops.versus.mod.items_and_effects.containers;
 
+import frootloops.versus.VersusSettings;
+
 /**
  * When the peek at a placed shulker box takes the wheel and the use from the game: only while it shows, is wanted, and the
  * main hand is empty (with something in it, the wheel is the hotbar's and the use is that item's, or the box's opening).
@@ -19,5 +21,13 @@ public final class PeekRules {
      */
     public static boolean takesInput(boolean enabled, boolean shows, boolean screenOpen, boolean sneaking, boolean hudHidden, boolean emptyHand) {
         return enabled && shows && !screenOpen && !sneaking && !hudHidden && emptyHand;
+    }
+
+    /**
+     * Whether the wheel is the peek's: only while it takes input and the wheel has rested from the hotbar for a moment, so
+     * that a scroll through the hotbar isn't caught by the peek at the first empty slot it lands on.
+     */
+    public static boolean takesWheel(boolean takesInput, int ticksSinceHotbarWheel) {
+        return takesInput && ticksSinceHotbarWheel >= VersusSettings.Shulkers.PEEK_WHEEL_REST_TICKS;
     }
 }

@@ -382,5 +382,6 @@
   "key.players-versus.shulker_peek": "Aperçu des boîtes de Shulker",
   "key.category.players-versus.controls": "Players Versus",
   "players-versus.shulker_peek.on": "Aperçu des boîtes de Shulker : activé",
-  "players-versus.shulker_peek.off": "Aperçu des boîtes de Shulker : désactivé"
+  "players-versus.shulker_peek.off": "Aperçu des boîtes de Shulker : désactivé",
+  "players-versus.shulker_peek.choose": "Molette pour choisir"
 }

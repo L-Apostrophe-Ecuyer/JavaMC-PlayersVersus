@@ -21,7 +21,7 @@ public final class Containers {
                 ShulkerSelection.selectInMenu(context.player().containerMenu, payload.menuSlot(), payload.boxSlot()));
         ServerPlayNetworking.registerGlobalReceiver(PeekShulkerPayload.TYPE, (payload, context) -> answer(context.player(), payload.pos()));
         ServerPlayNetworking.registerGlobalReceiver(TakeFromShulkerPayload.TYPE, (payload, context) -> {
-            ShulkerPeeking.take(context.player(), payload.pos(), payload.slot(), payload.item());
+            ShulkerPeeking.take(context.player(), payload.pos(), payload.slot(), payload.seen());
             answer(context.player(), payload.pos());
         });
     }

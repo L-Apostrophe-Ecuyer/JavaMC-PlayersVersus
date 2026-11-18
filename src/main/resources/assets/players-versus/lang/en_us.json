@@ -537,5 +537,6 @@
   "key.players-versus.shulker_peek": "Shulker Box Peek",
   "key.category.players-versus.controls": "Players Versus",
   "players-versus.shulker_peek.on": "Shulker box peek: on",
-  "players-versus.shulker_peek.off": "Shulker box peek: off"
+  "players-versus.shulker_peek.off": "Shulker box peek: off",
+  "players-versus.shulker_peek.choose": "Scroll to choose"
 }

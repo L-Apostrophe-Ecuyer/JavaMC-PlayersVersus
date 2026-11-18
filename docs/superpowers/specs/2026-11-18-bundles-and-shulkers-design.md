@@ -118,3 +118,40 @@ Asked (2026-11-18):
   already). `ShulkerColorsTest` (5), `PeekRulesTest` (4), `ShulkersGameTest` (30). Seen in game: the peek in blue and
   lime, the tooltip in red and black. With an empty main hand there is always a free slot, so a peek take never lacks
   room (`takingFillsTheSlotTheEmptyHandLeavesFree`); `ShulkerPeeking.take`'s room check stays as a guard.
+
+## The peek, refined (2026-11-18)
+
+Asked: "Refine the shulker in world ui a bit more; user experience, expected behavior & intent vs result, possible
+conflicting inputs". What playing it showed, and what changes:
+
+1. **A take filled the hand and the peek went away.** The game puts a new stack in the first empty slot, often the
+   one held, so after one take the hand held it and the peek (empty hand only) vanished. **A take keeps the held slot
+   free**: onto stacks of the same item first, then the first free slot other than the held one; the held slot only if
+   nothing else has room.
+2. **The wheel stuck on an empty hotbar slot.** Scrolling through the hotbar while looking at a box, the first empty
+   slot made the peek appear and the next notch went into the box. **The hotbar keeps a scroll it began**: the peek
+   takes the wheel only once the wheel has rested from the hotbar for half a second (10 ticks).
+3. **After a take, the place was lost.** The selection went back to nothing, and the next turn of the wheel started
+   from the first item again. **The peek remembers where it was**: after a take nothing is selected (a second take
+   still needs a turn of the wheel), and the next turn goes on from the slot just emptied.
+4. **No way back to opening the box.** With an item selected, a use always took it. **The wheel passes through
+   nothing** between the last item and the first: one more notch unselects, and a use opens the box again.
+5. **The item could change under the selection.** Another player's move could leave the highlight on something else,
+   and a take named only the item's kind. **A changed slot unselects**, and a take names the whole stack seen (its
+   components too, so not another enchanted sword); the server takes it only if that is still what is there.
+6. **A use held from before took.** A use key already held when the wheel selected would take at its next repeat.
+   **A take needs a fresh press** of the use key after the selection.
+7. **The grid flickered at a box's edge.** A one-tick slip of the crosshair reset the selection and asked the server
+   again. **The peek outlasts a slip of 4 ticks**: still drawn, the selection kept, but the wheel and the use the game's
+   until the crosshair is back on the box.
+8. **Nothing told a new player what to do.** **A dim "Scroll to choose" line** shows under the grid while the wheel
+   would choose and nothing is chosen; a selection shows its name and count ("Golden Apple ×3").
+9. **The grid could reach the action bar** on a small screen. It moves up as needed to keep above it, never onto the
+   crosshair.
+
+**As built:** all nine. `ShulkerPeeking.take` names the stack seen (`TakeFromShulkerPayload` carries it) and gives it past
+the held slot; `PeekCursor` (the selection through nothing, the place kept, unselecting a changed slot);
+`PeekRules.takesWheel` (`VersusSettings.Shulkers.PEEK_WHEEL_REST_TICKS = 10`); `ShulkerPeek` with the slip
+(`PEEK_SLIP_TICKS = 4`), the fresh press, the hint and the layout. `PeekCursorTest` (8), `PeekRulesTest` (5),
+`ShulkersGameTest` (32: `aTakeKeepsTheHeldSlotFree` and `takingAnotherOfTheSameKindTakesNothing` failed first, against
+vanilla's placement and a take by kind). Seen in game: the hint, then "Diamond ×12" on an orange box.
