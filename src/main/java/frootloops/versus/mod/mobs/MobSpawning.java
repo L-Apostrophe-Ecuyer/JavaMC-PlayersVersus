@@ -32,9 +32,11 @@ import net.minecraft.world.level.EntityGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -139,10 +141,11 @@ public class MobSpawning {
 
     /**
      * The mod's rules for a natural spawn of a vanilla monster, on top of the darkness the game asks of them all: what it
-     * stands on (natural ground, by its tag), the sky's light where it stands and whether it sees the sky, its height, the
-     * hour. True for the monsters these rules don't cover.
+     * stands on (natural ground, by its tag), the sky's light where it stands (full: it sees the sky, as the game's
+     * canSeeSky says), its height, the hour. True for the monsters these rules don't cover.
      */
-    public static boolean overworldRules(EntityType<?> type, boolean naturalGround, int skyLight, int y, boolean seesSky, boolean midnight) {
+    public static boolean overworldRules(EntityType<?> type, boolean naturalGround, int skyLight, int y, boolean midnight) {
+        boolean seesSky = skyLight >= 15;
         // On natural ground only, at every hour; not below the pale line, where their pale kin spawn (PaleKin); midnight
         // lifts only the rule against the open sky up high
         if (type == EntityTypes.ZOMBIE || type == EntityTypes.SKELETON) return naturalGround && y >= PaleLine.Y && (midnight || !(y > 64 && seesSky));
@@ -153,6 +156,24 @@ public class MobSpawning {
         // Zombies' and skeletons' kin on natural ground too (husks, strays and parched want the sky by their own rules)
         if (UNDEAD_KIN.contains(type)) return naturalGround;
         return true;
+    }
+
+    /**
+     * Vanilla's darkness check for a monster's spawn (Monster.isDarkEnoughToSpawn), from the sky's light the spawn check
+     * read already (its rules read it too): the same tests in the same order, the random drawn as vanilla draws it, the
+     * brightness worked out from that read and one of the block light as the light engine works it out (the brighter of
+     * the two, the sky's darkened; 15 past the world's edge). SpawnRulesGameTest holds it to vanilla's answer.
+     */
+    public static boolean darkEnoughToSpawn(ServerLevelAccessor world, BlockPos pos, RandomSource random, int skyLight) {
+        if (skyLight > random.nextInt(32)) return false;
+        DimensionType dimension = world.dimensionType();
+        int blockLight = world.getBrightness(LightLayer.BLOCK, pos);
+        int blockLightLimit = dimension.monsterSpawnBlockLightLimit();
+        if (blockLightLimit < 15 && blockLight > blockLightLimit) return false;
+        int darkening = world.getLevel().isThundering() ? 10 : world.getSkyDarken();
+        boolean inWorld = pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000;
+        int brightness = inWorld ? Math.max(blockLight, skyLight - darkening) : 15;
+        return brightness <= dimension.monsterSpawnLightTest().sample(random);
     }
 
     public static boolean isMidnightDuringNewMoon(LevelAccessor world) {

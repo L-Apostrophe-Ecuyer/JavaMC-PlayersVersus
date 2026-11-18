@@ -40,24 +40,24 @@ class MobSpawningTest {
      */
     @Test
     void creepersSpawnOnlyWhereNoSkyLightReaches() {
-        assertTrue(MobSpawning.overworldRules(EntityTypes.CREEPER, true, 0, 30, false, false), "a dark cave");
-        assertFalse(MobSpawning.overworldRules(EntityTypes.CREEPER, true, 1, 30, false, false), "a glimmer of sky");
-        assertFalse(MobSpawning.overworldRules(EntityTypes.CREEPER, true, 7, 30, false, false), "a deep overhang");
-        assertFalse(MobSpawning.overworldRules(EntityTypes.CREEPER, true, 15, 70, true, true), "the open sky, even at midnight");
-        assertFalse(MobSpawning.overworldRules(EntityTypes.CREEPER, false, 0, 30, false, false), "a floor someone built");
+        assertTrue(MobSpawning.overworldRules(EntityTypes.CREEPER, true, 0, 30, false), "a dark cave");
+        assertFalse(MobSpawning.overworldRules(EntityTypes.CREEPER, true, 1, 30, false), "a glimmer of sky");
+        assertFalse(MobSpawning.overworldRules(EntityTypes.CREEPER, true, 7, 30, false), "a deep overhang");
+        assertFalse(MobSpawning.overworldRules(EntityTypes.CREEPER, true, 15, 70, true), "the open sky, even at midnight");
+        assertFalse(MobSpawning.overworldRules(EntityTypes.CREEPER, false, 0, 30, false), "a floor someone built");
     }
 
     /** Zombies and skeletons spawn naturally only on natural ground, at every hour; midnight lifts only the rule against the open sky up high. */
     @Test
     void zombiesAndSkeletonsSpawnOnlyOnNaturalGround() {
         for (var type : java.util.List.of(EntityTypes.ZOMBIE, EntityTypes.SKELETON)) {
-            assertTrue(MobSpawning.overworldRules(type, true, 0, 30, false, false), type + " on stone in a cave");
-            assertFalse(MobSpawning.overworldRules(type, false, 0, 30, false, false), type + " on planks");
-            assertFalse(MobSpawning.overworldRules(type, false, 0, 30, false, true), type + " on planks at midnight");
-            assertFalse(MobSpawning.overworldRules(type, true, 15, 80, true, false), type + " under the open sky up high");
-            assertTrue(MobSpawning.overworldRules(type, true, 15, 80, true, true), type + " under the open sky up high at midnight");
-            assertTrue(MobSpawning.overworldRules(type, true, 15, 60, true, false), type + " under the open sky down low");
-            assertFalse(MobSpawning.overworldRules(type, true, 0, -5, false, false), type + " below the pale line (its pale kin's place)");
+            assertTrue(MobSpawning.overworldRules(type, true, 0, 30, false), type + " on stone in a cave");
+            assertFalse(MobSpawning.overworldRules(type, false, 0, 30, false), type + " on planks");
+            assertFalse(MobSpawning.overworldRules(type, false, 0, 30, true), type + " on planks at midnight");
+            assertFalse(MobSpawning.overworldRules(type, true, 15, 80, false), type + " under the open sky up high");
+            assertTrue(MobSpawning.overworldRules(type, true, 15, 80, true), type + " under the open sky up high at midnight");
+            assertTrue(MobSpawning.overworldRules(type, true, 15, 60, false), type + " under the open sky down low");
+            assertFalse(MobSpawning.overworldRules(type, true, 0, -5, false), type + " below the pale line (its pale kin's place)");
         }
     }
 
@@ -67,15 +67,15 @@ class MobSpawningTest {
      */
     @Test
     void spidersSpawnInTheOpenAtNightAsInCaves() {
-        assertTrue(MobSpawning.overworldRules(EntityTypes.SPIDER, false, 15, 80, true, false), "the open sky on the land, at night");
-        assertTrue(MobSpawning.overworldRules(EntityTypes.SPIDER, true, 0, 20, false, false), "a cave");
-        assertFalse(MobSpawning.overworldRules(EntityTypes.SPIDER, true, 15, 150, true, false), "a mountain's height");
-        assertFalse(MobSpawning.overworldRules(EntityTypes.SPIDER, true, 0, -5, false, false), "below the pale line");
+        assertTrue(MobSpawning.overworldRules(EntityTypes.SPIDER, false, 15, 80, false), "the open sky on the land, at night");
+        assertTrue(MobSpawning.overworldRules(EntityTypes.SPIDER, true, 0, 20, false), "a cave");
+        assertFalse(MobSpawning.overworldRules(EntityTypes.SPIDER, true, 15, 150, false), "a mountain's height");
+        assertFalse(MobSpawning.overworldRules(EntityTypes.SPIDER, true, 0, -5, false), "below the pale line");
     }
 
     @Test
     void otherMonstersAreLeftToTheirOwnRules() {
-        assertTrue(MobSpawning.overworldRules(EntityTypes.ENDERMAN, false, 15, 70, true, false));
+        assertTrue(MobSpawning.overworldRules(EntityTypes.ENDERMAN, false, 15, 70, false));
     }
 
     @Test
@@ -102,9 +102,9 @@ class MobSpawningTest {
         for (EntityType<?> kin : List.of(EntityTypes.HUSK, EntityTypes.ZOMBIE_VILLAGER, EntityTypes.STRAY, EntityTypes.BOGGED,
                 EntityTypes.PARCHED, EntityTypes.FROSTBITE)) {
             assertTrue(MobSpawning.ruled(kin, Level.OVERWORLD), kin + " isn't ruled");
-            assertFalse(MobSpawning.overworldRules(kin, false, 0, 30, false, false), kin + " on a floor someone built");
-            assertTrue(MobSpawning.overworldRules(kin, true, 15, 70, true, false), kin + " on natural ground under the sky");
-            assertTrue(MobSpawning.overworldRules(kin, true, 0, 30, false, true), kin + " on natural ground in a cave");
+            assertFalse(MobSpawning.overworldRules(kin, false, 0, 30, false), kin + " on a floor someone built");
+            assertTrue(MobSpawning.overworldRules(kin, true, 15, 70, false), kin + " on natural ground under the sky");
+            assertTrue(MobSpawning.overworldRules(kin, true, 0, 30, true), kin + " on natural ground in a cave");
         }
     }
 }

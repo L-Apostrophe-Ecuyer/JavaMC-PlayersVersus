@@ -1,6 +1,7 @@
 package frootloops.versus.gametest;
 
 import frootloops.versus.mod.environment.PaleLine;
+import frootloops.versus.mod.mobs.MobSpawning;
 import frootloops.versus.mod.mobs.ModEntities;
 import frootloops.versus.mod.environment.worldgen.CustomOverworldBiomes;
 import frootloops.versus.mod.mobs.hostile.end.WatchlingEntity;
@@ -243,6 +244,55 @@ public class SpawnRulesGameTest {
             other.discard();
             helper.assertTrue(near == 0, "a watchling may spawn with another " + distance + " blocks away");
             helper.succeed();
+        });
+    }
+
+    /**
+     * The spawn check reads the sky's light once and works out darkness from it (MobSpawning.darkEnoughToSpawn): the
+     * same answer as vanilla's own check (Monster.isDarkEnoughToSpawn), place by place and seed by seed: in a dark room
+     * (vanilla always lets a monster spawn), one lit by a torch (never), a tunnel the sky's light fades down (by chance,
+     * both draws), and the open. Once the light has settled over what was built.
+     */
+    @GameTest(structure = GROVE, maxTicks = 200, skyAccess = true)
+    public void theDarknessCheckIsVanillas(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos dark = room(helper, new BlockPos(4, 2, 4), 5, 3, Blocks.STONE, Blocks.STONE);
+        room(helper, new BlockPos(4, 2, 14), 5, 3, Blocks.STONE, Blocks.STONE);
+        level.setBlock(helper.absolutePos(new BlockPos(4, 2, 14)), Blocks.TORCH.defaultBlockState(), Block.UPDATE_ALL);
+        // A tunnel of stone one block wide and two high, open to the west, along which the sky's light fades
+        for (int x = 20; x <= 40; x++) {
+            for (int z = 19; z <= 21; z++) {
+                for (int y = 0; y <= 3; y++) {
+                    boolean inside = z == 20 && (y == 1 || y == 2);
+                    level.setBlock(helper.absolutePos(new BlockPos(x, y, z)), (inside ? Blocks.AIR : Blocks.STONE).defaultBlockState(), Block.UPDATE_CLIENTS);
+                }
+            }
+        }
+        level.setBlock(helper.absolutePos(new BlockPos(41, 1, 20)), Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+        level.setBlock(helper.absolutePos(new BlockPos(41, 2, 20)), Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+        List<BlockPos> places = new java.util.ArrayList<>();
+        for (int x = 4; x < 9; x++) for (int z = 4; z < 9; z++) places.add(helper.absolutePos(new BlockPos(x, 2, z)));
+        for (int x = 4; x < 9; x++) for (int z = 14; z < 19; z++) places.add(helper.absolutePos(new BlockPos(x, 2, z)));
+        for (int x = 20; x <= 40; x++) places.add(helper.absolutePos(new BlockPos(x, 1, 20)));
+        for (int x = 30; x < 36; x++) places.add(helper.absolutePos(new BlockPos(x, 1, 34)));
+        helper.succeedWhen(() -> {
+            helper.assertTrue(level.getBrightness(LightLayer.SKY, dark) == 0 && level.getBrightness(LightLayer.BLOCK, helper.absolutePos(new BlockPos(5, 2, 15))) > 0,
+                    "the light hasn't settled yet");
+            Set<Integer> skies = new java.util.TreeSet<>();
+            int allowed = 0, refused = 0;
+            for (BlockPos pos : places) {
+                int sky = level.getBrightness(LightLayer.SKY, pos);
+                skies.add(sky);
+                for (long seed = 0; seed < 200; seed++) {
+                    boolean ours = MobSpawning.darkEnoughToSpawn(level, pos, net.minecraft.util.RandomSource.create(seed), sky);
+                    boolean vanilla = net.minecraft.world.entity.monster.Monster.isDarkEnoughToSpawn(level, pos, net.minecraft.util.RandomSource.create(seed));
+                    helper.assertTrue(ours == vanilla, "at " + pos.toShortString() + " (sky " + sky + ", block " + level.getBrightness(LightLayer.BLOCK, pos)
+                            + "), seed " + seed + ": " + ours + " against vanilla's " + vanilla);
+                    if (vanilla) allowed++;
+                    else refused++;
+                }
+            }
+            helper.assertTrue(skies.size() >= 10 && allowed > 0 && refused > 0, "too little tried: skies " + skies + ", " + allowed + " allowed, " + refused + " refused");
         });
     }
 }
