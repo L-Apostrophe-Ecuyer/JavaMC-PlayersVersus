@@ -204,6 +204,21 @@ public class SpawnRulesGameTest {
         });
     }
 
+    /** The caves' pale creepers and spiders, as the game has them: the deep caves 180 and 40, the regular cave 120 and 40. */
+    @GameTest(structure = GROVE, maxTicks = 20)
+    public void theCavesListTheirPaleMobs(GameTestHelper helper) {
+        Registry<Biome> biomes = helper.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
+        Map<ResourceKey<Biome>, int[]> weights = Map.of(CustomOverworldBiomes.DEEP_CAVES, new int[]{180, 40}, CustomOverworldBiomes.REGULAR_CAVE, new int[]{120, 40});
+        weights.forEach((key, expected) -> {
+            var monsters = biomes.getValueOrThrow(key).getAttributes().applyModifier(EnvironmentAttributes.NATURAL_MOB_SPAWNS, MobSpawnSettings.EMPTY)
+                    .getMobsToSpawn(MobCategory.MONSTER).unwrap();
+            int creepers = monsters.stream().filter(entry -> entry.value().type() == ModEntities.PALE_CREEPER).mapToInt(Weighted::weight).sum();
+            int spiders = monsters.stream().filter(entry -> entry.value().type() == ModEntities.PALE_SPIDER).mapToInt(Weighted::weight).sum();
+            helper.assertTrue(creepers == expected[0] && spiders == expected[1], key.identifier() + " lists pale creepers at " + creepers + " and pale spiders at " + spiders);
+        });
+        helper.succeed();
+    }
+
     /**
      * Watchlings now and then: every pale biome lists them at 15 (the Pale Garden, the pale taiga, the pale swamp), the
      * caves at 12 (the deep caves, the pale grotto and hollow, the regular cave).

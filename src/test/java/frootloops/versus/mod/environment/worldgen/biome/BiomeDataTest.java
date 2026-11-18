@@ -463,4 +463,26 @@ class BiomeDataTest {
             assertTrue(french.has("biome.players-versus." + name), name + " has no French name");
         }
     }
+
+    /**
+     * The caves' pale creepers and spiders are in their biome files, where the rest of their monsters are (the code added
+     * them before): the deep caves 180 and 40, the regular cave 120 and 40, the spiders in groups of one or two.
+     */
+    @Test
+    void theCavesListTheirPaleMobsThemselves() throws IOException {
+        Map<String, int[]> weights = Map.of("deep_caves", new int[]{180, 40}, "regular_cave", new int[]{120, 40});
+        for (Map.Entry<String, int[]> cave : weights.entrySet()) {
+            JsonArray monsters = read(DATA.resolve("players-versus/worldgen/biome/caves/" + cave.getKey() + ".json")).getAsJsonObject("attributes")
+                    .getAsJsonObject("minecraft:gameplay/natural_mob_spawns").getAsJsonObject("argument").getAsJsonObject("spawns_by_category").getAsJsonArray("monster");
+            int creepers = 0, spiders = 0;
+            for (JsonElement entry : monsters) {
+                String type = entry.getAsJsonObject().get("type").getAsString();
+                int weight = entry.getAsJsonObject().get("weight").getAsInt();
+                if (type.equals("players-versus:pale_creeper")) creepers += weight;
+                if (type.equals("players-versus:pale_spider")) spiders += weight;
+            }
+            assertEquals(cave.getValue()[0], creepers, cave.getKey() + "'s pale creepers");
+            assertEquals(cave.getValue()[1], spiders, cave.getKey() + "'s pale spiders");
+        }
+    }
 }
