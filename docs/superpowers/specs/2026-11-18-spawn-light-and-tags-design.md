@@ -53,16 +53,23 @@ what a tag nested in them already holds; one entry is listed twice; Fabric warns
 ## As built
 
 - **The sky light** (`HostileEntityMixin`, `MobSpawning.darkEnoughToSpawn`, `overworldRules` without `seesSky`): as
-  decided. `SpawnRulesGameTest.theDarknessCheckIsVanillas` compares the copy with vanilla's check at 76 places (a dark
-  room, a torch-lit one, a tunnel the sky's light fades down from 14 to 0, the open), 200 seeds each, once the light has
-  settled; the thunder branch is copied but not tested (the weather is the whole server's).
+  decided. `SpawnRulesGameTest` compares the copy with vanilla's check at 77 places (a dark room, a torch-lit one, a
+  tunnel the sky's light fades down from 14 to 0, the open), 200 seeds each, once the light has settled: by day, at
+  midnight and in a thunderstorm (test environments `players-versus-gametest:midnight` and `thunder`), so the sky's
+  darkening and vanilla's thunder branch are held too (the final review's mutant without the darkening fails all three).
 - **The tags** (`tools/tagfiles.py`, used by `transition-biomes.py`, `wetlands.py`, `refine-biomes.py`, `cypress.py`;
   `tree-blocks.py` no longer writes the two tags its logs' tags cover): as decided. 80 tag files pruned and 11 deleted
   (they only re-listed vanilla's); every tag's resolved contents compared before and after (847 tags): five differ, the
   cold frogs (five biomes fewer) and natural ground with the three spawn tags that nest it (25 blocks more). The rusty
   wolf coat's override is deleted. `TagAuditTest` (6) and `TagFiles` (what a tag holds, for the tests); `BiomeDataTest`
   asks what a tag holds rather than which file lists it. Fabric no longer warns of untranslated item tags; the thrown
-  slimeball has a name.
+  slimeball has a name. After the final review: a tag only the mod has keeps its file even empty (`tools/test_tagfiles.py`),
+  each generator ends its run with `prune_all`, and the three minecraft tags 26.4 no longer reads are gone
+  (`on_jungle_explorer_maps`, `on_swamp_explorer_maps`, `has_closer_water_fog`; a `TagAuditTest` check catches the next).
+- **The pale kin** (the owner's choice, decisions above): `NaturalSpawnerPaleKinMixin` with two optional
+  `@ModifyExpressionValue`s; the deep caves list pale creepers at 180 and pale spiders at 40, the regular cave at 120 and
+  40, in their files. `PaleKinSwapTest`, `BiomeDataTest.theCavesListTheirPaleMobsThemselves`, and
+  `SpawnRulesGameTest.theCavesListTheirPaleMobs` (the game's weights, the same before and after).
 
 ## The pale mobs (the owner's choice)
 
