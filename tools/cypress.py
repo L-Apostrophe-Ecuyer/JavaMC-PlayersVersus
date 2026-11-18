@@ -17,7 +17,7 @@ import sys
 from PIL import Image
 
 from lemons import ASSETS, DATA, MOD, add_names, write_json
-from tagfiles import add_to_tag, use_vanilla
+from tagfiles import add_to_tag, prune_all, use_vanilla
 
 
 def luminance(colour):
@@ -63,6 +63,7 @@ def main(vanilla):
     use_vanilla(vanilla)
     add_to_tag("minecraft/tags/block/leaves.json", f"{MOD}:cypress_leaves")
     add_to_tag("minecraft/tags/item/leaves.json", f"{MOD}:cypress_leaves")
+    prune_all()
     add_names({"en": {"block.players-versus.cypress_leaves": "Cypress Leaves"},
                "fr": {"block.players-versus.cypress_leaves": "Feuilles de cyprès"}})
 

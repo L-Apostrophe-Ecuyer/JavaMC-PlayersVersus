@@ -27,7 +27,7 @@ import os
 import sys
 
 import animals
-from tagfiles import set_tag, use_vanilla
+from tagfiles import prune_all, set_tag, use_vanilla
 
 MOD = "players-versus"
 DATA = os.path.join("src", "main", "resources", "data")
@@ -238,6 +238,7 @@ def main(vanilla):
     riverbanks()
     undergrowth()
     mobs(vanilla)
+    prune_all()
 
 
 if __name__ == "__main__":

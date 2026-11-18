@@ -58,6 +58,26 @@ class TagAuditTest {
         return TagFiles.nested(entries, registry);
     }
 
+    /**
+     * The minecraft tags the mod writes to that the game's base pack doesn't have, each read by something: the frost
+     * aspect enchantment reads fire_aspect_lightable; the trade tags are the trade rebalance pack's, which TradeKeys reads.
+     */
+    private static boolean readAnyway(String path) {
+        return path.equals("block/fire_aspect_lightable") || path.startsWith("enchantment/trades/");
+    }
+
+    @Test
+    void everyMinecraftTagTheModWritesIsOneTheGameReads() {
+        // A tag renamed or dropped by a version (26.4's on_jungle_explorer_maps, now on_jungle_pyramid_maps) is read by nothing
+        List<String> unread = new ArrayList<>();
+        for (String id : TAGS.keySet()) {
+            if (!id.startsWith("minecraft:")) continue;
+            String path = id.substring("minecraft:".length());
+            if (vanilla("minecraft", path) == null && !readAnyway(path)) unread.add(id);
+        }
+        assertTrue(unread.isEmpty(), "minecraft tags the game doesn't have, which nothing reads: " + unread);
+    }
+
     @Test
     void noTagListsAnEntryTwice() {
         List<String> twice = new ArrayList<>();

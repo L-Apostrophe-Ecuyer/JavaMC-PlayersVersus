@@ -7,8 +7,10 @@ The game merges the mod's tag files with its own and follows the tags nested in 
 twice in a file, never when vanilla's own file of the tag lists it, never when a tag nested in the mod's file or in
 vanilla's already holds it (the tag would hold it anyway). The generators add entries with add_to_tag, which keeps to
 that once use_vanilla has told it where the game's data is; a tag a generator owns whole (the climate variants, from
-tools/animals.py) it writes with set_tag, which no other generator's add_to_tag touches (OWNED). Pruning a file rewrites
-it by the same rule; a file left with nothing to add is deleted. TagAuditTest checks the files keep to it.
+tools/animals.py) it writes with set_tag, which no other generator's add_to_tag touches (OWNED). Without use_vanilla only
+the mod's own files are followed. Each generator ends its run with prune_all: an entry a nested tag came to hold later in
+the run goes too. A file left adding nothing to a tag vanilla has is deleted; a tag only the mod has keeps its file, even
+empty. TagAuditTest checks the files keep to it; tools/test_tagfiles.py checks the helper.
 """
 import json
 import os
@@ -104,11 +106,21 @@ def _tidy(path, values, replace=False):
     held = _held_already(path, [value for value in kept if isinstance(value, str)])
     kept = [value for value in kept if (value["id"] if isinstance(value, dict) else value).startswith("#")
             or (value["id"] if isinstance(value, dict) else value) not in held]
-    if not kept and not replace:
+    if not kept and not replace and _vanilla_has(path):
+        # Vanilla's own tag holds all of it: the file adds nothing. A tag only the mod has keeps its file, even empty
+        # (a structure or another tag may name it)
         if os.path.exists(full):
             os.remove(full)
         return
     _write(full, {"replace": replace, "values": kept})
+
+
+def _vanilla_has(path):
+    """Whether the game's own data has the tag at this file's path (never known without use_vanilla)."""
+    if not _vanilla:
+        return False
+    namespace, registry, name = _split(path)
+    return os.path.exists(os.path.join(_vanilla, "data", namespace, "tags", registry, name + ".json"))
 
 
 def add_to_tag(path, *values):

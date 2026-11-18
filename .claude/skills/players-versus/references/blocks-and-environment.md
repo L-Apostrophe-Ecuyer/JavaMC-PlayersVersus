@@ -279,9 +279,10 @@ supersedes the first spec's litter and soft landings). Tunables: `VersusSettings
   buried heart isn't always on). Roots' faces use `withFaces(..., false)`: cut only against the tree, bark against the
   ground.
 - **Drops** the vanilla log (loot tables). Creative only: an item per wood after its log in the natural blocks tab.
-- **Tags**: in its wood's `#minecraft:<wood>_logs` (so `logs_that_burn`, `logs`, mineable with axe, creaking hearts),
-  and listed by name in `overworld_natural_logs`, `prevents_nearby_leaf_decay`, `supports_cocoa` (jungle),
-  `blocks_motion_no_leaves` and `mangrove_logs_can_grow_through`.
+- **Tags**: in its wood's `#minecraft:<wood>_logs` (so `logs_that_burn`, `logs`, mineable with axe, creaking hearts,
+  `prevents_nearby_leaf_decay`, `supports_cocoa` for the jungle's), and listed by name in `overworld_natural_logs` and
+  `mangrove_logs_can_grow_through` (`blocks_motion_no_leaves` holds them through `#logs`). Tags are written through
+  `tools/tagfiles.py`, which never lists what a tag holds already; `TagAuditTest` checks it.
 - **Assets and data are generated** by `tools/tree-blocks.py` (run from the repository root): per wood a 36-part
   multipart blockstate of one-face models (`models/block/tree_face/*`, vanilla's `cube_column` faces plus the lying
   log's half-turned up face), turned as vanilla's log blockstate turns them, so an uncut tree looks exactly vanilla;

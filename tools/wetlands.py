@@ -224,8 +224,8 @@ def mangrove_swamp(vanilla):
 
 def tags(vanilla):
     cold = f"{MOD}:cold_swamp"
-    for tag in ["is_overworld", "has_structure/mineshaft", "has_structure/swamp_hut", "spawns_cold_variant_frogs",
-                "allows_surface_slime_spawns", "has_closer_water_fog"]:
+    # (Its frogs are the animals table's, its water's fog the game's own: has_closer_water_fog went in 26.4)
+    for tag in ["is_overworld", "has_structure/mineshaft", "has_structure/swamp_hut", "allows_surface_slime_spawns"]:
         transition.add_to_tag(f"minecraft/tags/worldgen/biome/{tag}.json", cold)
     # Each new wetland is what it comes from, in the tags of structures, mobs and the map
     for child, parent in [("grassy_wetlands", "minecraft:swamp"), ("mangrove_marsh", "minecraft:mangrove_swamp")]:
@@ -251,6 +251,7 @@ def main(vanilla):
     mangrove_swamp(vanilla)
     waterlogged_leaves()
     tags(vanilla)
+    transition.prune_all()
     lemons.add_names(NAMES)
 
 

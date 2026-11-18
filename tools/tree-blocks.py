@@ -5,9 +5,9 @@ A tree block draws each face as its wood's vanilla log does, with the log's text
 its blockstate is a multipart of 36 parts (3 axes x 6 faces x bark or cut), each a model of one face of vanilla's
 log models (cube_column standing, cube_column_horizontal lying), turned as vanilla's log blockstate turns them. Also
 writes each wood's item model (its vanilla log's), loot table (its vanilla log) and its place in its wood's log tag,
-and puts every tree block in the vanilla tags that name logs one by one (natural logs, what keeps leaves alive, what
-cocoa grows on). The mod's own lists of its blocks (blocks_motion_no_leaves, mangrove_logs_can_grow_through) are kept
-by hand.
+and puts every tree block in overworld_natural_logs, which names logs one by one (what keeps leaves alive and what cocoa
+grows on take the logs' tags, so the tree blocks are in them already). The mod's own lists of its blocks
+(blocks_motion_no_leaves, mangrove_logs_can_grow_through) are kept by hand.
 """
 import json
 import os

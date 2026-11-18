@@ -22,7 +22,7 @@ import os
 import sys
 
 import animals
-from tagfiles import add_to_tag, use_vanilla
+from tagfiles import add_to_tag, prune_all, use_vanilla
 
 MOD = "players-versus"
 DATA = os.path.join("src", "main", "resources", "data")
@@ -487,6 +487,8 @@ def main(vanilla):
     for name, spec in BIOMES.items():
         make(vanilla, name, spec)
     tags(vanilla)
+    # An entry a nested tag came to hold later in the run goes too
+    prune_all()
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     lemons = __import__("lemons")
     lemons.add_names(NAMES)
