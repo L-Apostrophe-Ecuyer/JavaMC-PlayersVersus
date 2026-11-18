@@ -50,6 +50,20 @@ what a tag nested in them already holds; one entry is listed twice; Fabric warns
 - Unit: `MobSpawningTest` (the rules, without `seesSky`), `TagAuditTest`.
 - Before and after the prune, every tag's resolved contents compared: unchanged but for decisions 1 and 4.
 
+## As built
+
+- **The sky light** (`HostileEntityMixin`, `MobSpawning.darkEnoughToSpawn`, `overworldRules` without `seesSky`): as
+  decided. `SpawnRulesGameTest.theDarknessCheckIsVanillas` compares the copy with vanilla's check at 76 places (a dark
+  room, a torch-lit one, a tunnel the sky's light fades down from 14 to 0, the open), 200 seeds each, once the light has
+  settled; the thunder branch is copied but not tested (the weather is the whole server's).
+- **The tags** (`tools/tagfiles.py`, used by `transition-biomes.py`, `wetlands.py`, `refine-biomes.py`, `cypress.py`;
+  `tree-blocks.py` no longer writes the two tags its logs' tags cover): as decided. 80 tag files pruned and 11 deleted
+  (they only re-listed vanilla's); every tag's resolved contents compared before and after (847 tags): five differ, the
+  cold frogs (five biomes fewer) and natural ground with the three spawn tags that nest it (25 blocks more). The rusty
+  wolf coat's override is deleted. `TagAuditTest` (6) and `TagFiles` (what a tag holds, for the tests); `BiomeDataTest`
+  asks what a tag holds rather than which file lists it. Fabric no longer warns of untranslated item tags; the thrown
+  slimeball has a name.
+
 ## The pale mobs (held)
 
 In 26.4 a biome's spawns are its `minecraft:gameplay/natural_mob_spawns` attribute, layered by dimension, biome, timeline
