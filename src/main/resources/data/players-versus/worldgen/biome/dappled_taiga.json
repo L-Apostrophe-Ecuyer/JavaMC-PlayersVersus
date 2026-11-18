@@ -65,6 +65,7 @@
       "players-versus:dappled_taiga_vegetation",
       "minecraft:glow_lichen",
       "minecraft:patch_large_fern",
+      "minecraft:patch_bush",
       "minecraft:flower_default",
       "minecraft:patch_grass_taiga_2",
       "minecraft:brown_mushroom_taiga",
@@ -91,36 +92,46 @@
           "creature": [
             {
               "type": "minecraft:sheep",
-              "weight": 12,
-              "count": 4
+              "count": 4,
+              "weight": 12
             },
             {
-              "type": "minecraft:llama",
-              "weight": 10,
-              "count": 4
+              "type": "minecraft:pig",
+              "count": 4,
+              "weight": 10
+            },
+            {
+              "type": "minecraft:chicken",
+              "count": 4,
+              "weight": 10
+            },
+            {
+              "type": "minecraft:cow",
+              "count": 4,
+              "weight": 8
             },
             {
               "type": "minecraft:wolf",
-              "weight": 8,
-              "count": 4
+              "count": 4,
+              "weight": 8
             },
             {
               "type": "minecraft:rabbit",
-              "weight": 4,
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 3
-              }
+                "max_inclusive": 3,
+                "min_inclusive": 2
+              },
+              "weight": 4
             },
             {
               "type": "minecraft:fox",
-              "weight": 8,
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 4
-              }
+                "max_inclusive": 4,
+                "min_inclusive": 2
+              },
+              "weight": 8
             }
           ],
           "misc": [],

@@ -1,0 +1,26 @@
+{
+  "type": "players-versus:rock_formation",
+  "biomes": "#players-versus:has_structure/rock_formation",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "rock": {
+    "bodies": [
+      {
+        "shape": "monolith"
+      },
+      {
+        "shape": "boulder",
+        "count": [
+          0,
+          2
+        ],
+        "distance": [
+          17,
+          22
+        ],
+        "cover": 0.2
+      }
+    ]
+  }
+}

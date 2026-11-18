@@ -1,8 +1,6 @@
 {
   "replace": false,
   "values": [
-    "minecraft:binding_curse",
-    "minecraft:vanishing_curse",
     "players-versus:ender_curse"
   ]
 }

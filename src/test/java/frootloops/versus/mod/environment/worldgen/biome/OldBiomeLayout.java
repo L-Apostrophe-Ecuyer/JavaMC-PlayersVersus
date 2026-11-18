@@ -36,13 +36,25 @@ final class OldBiomeLayout {
     private static final long MIN_TEMPERATURE_FOR_FROZEN_TRANSITION_LONG = Climate.quantizeCoord(MIN_TEMPERATURE_FOR_FROZEN_TRANSITION),
             MAX_TEMPERATURE_FOR_FROZEN_TRANSITION_LONG = Climate.quantizeCoord(MAX_TEMPERATURE_FOR_FROZEN_TRANSITION);
 
-    private static final float MIN_TEMPERATURE_FOR_WARM_TRANSITION = 0.15F, MAX_TEMPERATURE_FOR_WARM_TRANSITION = 0.375F;
+    private static final float MIN_TEMPERATURE_FOR_WARM_TRANSITION = 0.2f, MAX_TEMPERATURE_FOR_WARM_TRANSITION = 0.3f;
     private static final long MIN_TEMPERATURE_FOR_WARM_TRANSITION_LONG = Climate.quantizeCoord(MIN_TEMPERATURE_FOR_WARM_TRANSITION),
             MAX_TEMPERATURE_FOR_WARM_TRANSITION_LONG = Climate.quantizeCoord(MAX_TEMPERATURE_FOR_WARM_TRANSITION);
 
     private static final float MIN_HUMIDITY_FOR_FOREST_TRANSITION = 0.275f, MAX_HUMIDITY_FOR_FOREST_TRANSITION = 0.35f;
     private static final long MIN_HUMIDITY_FOR_FOREST_TRANSITION_LONG = Climate.quantizeCoord(MIN_HUMIDITY_FOR_FOREST_TRANSITION),
             MAX_HUMIDITY_FOR_FOREST_TRANSITION_LONG = Climate.quantizeCoord(MAX_HUMIDITY_FOR_FOREST_TRANSITION);
+
+    /**
+     * The warm transitions as they were added here in c82d4371, frozen: the live map moves on with the new layout (and
+     * once held a placeholder), which would move this reference with it.
+     */
+    private static final java.util.Map<ResourceKey<Biome>, ResourceKey<Biome>> OLD_WARM_TRANSITIONS = java.util.Map.of(
+            Biomes.SAVANNA_PLATEAU, Biomes.PLAINS,
+            Biomes.SAVANNA, CustomOverworldBiomes.MOUNTAINSIDE_FOREST_WARM,
+            Biomes.DARK_FOREST, Biomes.FOREST,
+            Biomes.SPARSE_JUNGLE, CustomOverworldBiomes.MOUNTAINSIDE_JUNGLE,
+            Biomes.JUNGLE, Biomes.SPARSE_JUNGLE,
+            Biomes.BAMBOO_JUNGLE, Biomes.SPARSE_JUNGLE);
 
     private OldBiomeLayout() {
     }
@@ -142,7 +154,7 @@ final class OldBiomeLayout {
             }
         }
         else if (temperature.min() < MIN_TEMPERATURE_FOR_WARM_TRANSITION_LONG && temperature.max() > MIN_TEMPERATURE_FOR_WARM_TRANSITION_LONG) {
-            transitionBiome = CustomOverworldBiomes.getWarmTransitionBiome(biome);
+            transitionBiome = OLD_WARM_TRANSITIONS.get(biome);
             if (transitionBiome != null) {
                 float minTemperature = Math.max(Climate.unquantizeCoord(temperature.min()), MIN_TEMPERATURE_FOR_WARM_TRANSITION);
                 float maxTemperature = Climate.unquantizeCoord(temperature.max());
@@ -150,7 +162,7 @@ final class OldBiomeLayout {
                 newTemperature = Parameter.span(Climate.unquantizeCoord(temperature.min()), MIN_TEMPERATURE_FOR_WARM_TRANSITION);
             }
         } else if (temperature.min() < MAX_TEMPERATURE_FOR_WARM_TRANSITION_LONG && temperature.max() > MAX_TEMPERATURE_FOR_WARM_TRANSITION_LONG) {
-            transitionBiome = CustomOverworldBiomes.getWarmTransitionBiome(biome);
+            transitionBiome = OLD_WARM_TRANSITIONS.get(biome);
             if (transitionBiome != null) {
                 float minTemperature = Climate.unquantizeCoord(temperature.min());
                 float maxTemperature = Math.min(Climate.unquantizeCoord(temperature.max()), MAX_TEMPERATURE_FOR_WARM_TRANSITION);

@@ -69,7 +69,18 @@ fabricApi {
 		createSourceSet = true
 		modId = "players-versus-gametest"
 		enableGameTests = true
-		enableClientGameTests = false
+		enableClientGameTests = true
+	}
+}
+
+// The worldgen gallery (WorldgenGallery, a client game test): -Ppv.gallery="biome:players-versus:tuscan_grove;at:0,0" makes
+// the real client create a world and save screenshots to build/run/clientGameTest/screenshots. Other options:
+// -Ppv.gallery.seed, -Ppv.gallery.preset, -Ppv.gallery.distance, -Ppv.gallery.size. Without -Ppv.gallery it does nothing.
+loom.runs.matching { it.name == "clientGameTest" }.configureEach {
+	["pv.gallery", "pv.gallery.seed", "pv.gallery.preset", "pv.gallery.distance", "pv.gallery.size"].each { name ->
+		if (providers.gradleProperty(name).isPresent()) {
+			vmArg "-D${name}=${providers.gradleProperty(name).get()}"
+		}
 	}
 }
 

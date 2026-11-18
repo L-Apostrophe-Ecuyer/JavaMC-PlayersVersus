@@ -1,0 +1,30 @@
+{
+  "structures": [
+    {
+      "structure": "players-versus:rock/scattered_icy_monolith",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/scattered_icy_spires",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/scattered_icy_towers",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/scattered_icy_great_boulders",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/scattered_icy_massif",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 905181357,
+    "spacing": 12,
+    "separation": 5
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "chance": 0.18,
+      "feature": {
+        "feature": "players-versus:swamp_small_mangrove",
+        "placement": [
+          {
+            "type": "minecraft:block_predicate_filter",
+            "predicate": {
+              "type": "minecraft:would_survive",
+              "state": {
+                "id": "minecraft:mangrove_propagule",
+                "properties": {
+                  "age": "0",
+                  "hanging": "false",
+                  "stage": "0",
+                  "waterlogged": "false"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "default": {
+    "feature": "minecraft:swamp_oak",
+    "placement": [
+      {
+        "type": "minecraft:block_predicate_filter",
+        "predicate": {
+          "type": "minecraft:would_survive",
+          "state": {
+            "id": "minecraft:oak_sapling",
+            "properties": {
+              "stage": "0"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+# Bundles and shulker boxes (tools/gallery.sh @<this file's absolute path> <output>): the peek at a placed box, the
+# bundle's 5 by 4 grid (25 stacks: 19 and "+N"), a shulker box's tooltip in its colour and the wheel's selection in it
+cmd:gamerule send_command_feedback false
+cmd:gamerule show_advancement_messages false
+name:plains
+biome:plains
+gui:
+name:peek
+peek:
+name:peek_blue
+peek:,,minecraft:blue_shulker_box
+name:peek_lime
+peek:,,minecraft:lime_shulker_box
+name:bundle_tooltip
+cmd:clear @p
+cmd:give @p bundle[bundle_contents=[{id:"minecraft:stone",count:1},{id:"minecraft:dirt",count:2},{id:"minecraft:oak_log",count:3},{id:"minecraft:sand",count:1},{id:"minecraft:gravel",count:2},{id:"minecraft:cobblestone",count:3},{id:"minecraft:coal",count:1},{id:"minecraft:iron_ingot",count:2},{id:"minecraft:gold_ingot",count:3},{id:"minecraft:diamond",count:1},{id:"minecraft:emerald",count:2},{id:"minecraft:redstone",count:3},{id:"minecraft:lapis_lazuli",count:1},{id:"minecraft:apple",count:2},{id:"minecraft:bread",count:3},{id:"minecraft:carrot",count:1},{id:"minecraft:potato",count:2},{id:"minecraft:wheat_seeds",count:3},{id:"minecraft:string",count:1},{id:"minecraft:feather",count:2},{id:"minecraft:bone",count:3},{id:"minecraft:arrow",count:1},{id:"minecraft:torch",count:2},{id:"minecraft:flint",count:3},{id:"minecraft:clay_ball",count:1}]]
+hover:36
+shot:
+close:
+name:shulker_tooltip
+cmd:clear @p
+cmd:give @p shulker_box[container=[{slot:0,item:{id:"minecraft:diamond",count:12}},{slot:2,item:{id:"minecraft:golden_apple",count:3}},{slot:4,item:{id:"minecraft:torch",count:64}},{slot:10,item:{id:"minecraft:ender_pearl",count:16}},{slot:13,item:{id:"minecraft:bread",count:20}},{slot:22,item:{id:"minecraft:iron_ingot",count:30}},{slot:26,item:{id:"minecraft:oak_log",count:48}}]]
+hover:36
+shot:
+scroll:-1
+shot:
+scroll:-1
+shot:
+close:
+name:shulker_tooltip_red
+cmd:clear @p
+cmd:give @p red_shulker_box[container=[{slot:0,item:{id:"minecraft:diamond",count:12}},{slot:2,item:{id:"minecraft:golden_apple",count:3}},{slot:4,item:{id:"minecraft:torch",count:64}},{slot:10,item:{id:"minecraft:ender_pearl",count:16}},{slot:13,item:{id:"minecraft:bread",count:20}},{slot:22,item:{id:"minecraft:iron_ingot",count:30}},{slot:26,item:{id:"minecraft:oak_log",count:48}}]]
+hover:36
+scroll:-1
+shot:
+close:
+name:shulker_tooltip_black
+cmd:clear @p
+cmd:give @p black_shulker_box[container=[{slot:0,item:{id:"minecraft:diamond",count:12}},{slot:2,item:{id:"minecraft:golden_apple",count:3}},{slot:4,item:{id:"minecraft:torch",count:64}},{slot:10,item:{id:"minecraft:ender_pearl",count:16}},{slot:13,item:{id:"minecraft:bread",count:20}},{slot:22,item:{id:"minecraft:iron_ingot",count:30}},{slot:26,item:{id:"minecraft:oak_log",count:48}}]]
+hover:36
+scroll:-1
+shot:
+close:

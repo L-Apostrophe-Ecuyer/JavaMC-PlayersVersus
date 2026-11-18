@@ -28,18 +28,27 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.EntityGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.Set;
 
 public class MobSpawning {
 
     public static final int MOB_CAP_MONSTERS = 36;
     public static final int MOB_CAP_AMBIENT = 4;
 
+    /** Natural ground (natural_ground): the overworld's stones, dirts, sands, gravel, terracotta, snow, ice, clay... and the mod's muds and clays. */
     public static final TagKey<Block> UNDEAD_OVERWORLD_SPAWNABLE = blockTagOf("undead_overworld_spawnable_on");
     public static final TagKey<Block> CREEPER_SPAWNABLE = blockTagOf("creeper_spawnable_on");
     public static final TagKey<Block> PALE_MOBS_SPAWNABLE = blockTagOf("pale_mobs_spawnable_on");
@@ -52,9 +61,7 @@ public class MobSpawning {
 
         // Deep caves:
         // BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), SpawnGroup.MONSTER, VanillaEntities.WITHER_SKELETON, 50, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.PALE_CREEPER, 100, 1, 1);
-        // Pale spiders too, below the pale line (canSpawnPaleSpider), as pale zombies and creepers
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.PALE_SPIDER, 40, 1, 2);
+        // The deep caves' and the regular cave's pale creepers, spiders and zombies are in their biome files
         SpawnPlacements.register(ModEntities.PALE_CREEPER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleCreeper);
 
         //BiomeModifications.addSpawn(BiomeSelectors.excludeByKey(BiomeKeys.DEEP_DARK), SpawnGroup.MONSTER, ModEntities.PALE_ZOMBIE, 100, 4, 4);
@@ -84,9 +91,13 @@ public class MobSpawning {
                 MobCategory.MONSTER, ModEntities.PALE_WOLF, 8, 2, 4);
         SpawnPlacements.register(ModEntities.PALE_WOLF, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnPaleWolf);
 
-        // Watchlings: rarely, where paleness holds, in the dark (canSpawnWatchling)
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.PALE_GARDEN), MobCategory.MONSTER, ModEntities.WATCHLING, 4, 1, 1);
-        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.PALE_GROTTO, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.WATCHLING, 3, 1, 1);
+        // Watchlings: now and then, where paleness holds, in the dark (canSpawnWatchling), never within WATCHLINGS_APART
+        // blocks of another: in every pale biome on the surface (the Pale Garden, the pale taiga, the pale swamp), and in
+        // the caves (the pale ones and the regular cave)
+        BiomeModifications.addSpawn(BiomeSelectors.tag(PaleLine.PALE_BIOMES).and(BiomeSelectors.excludeByKey(CustomOverworldBiomes.DEEP_CAVES,
+                CustomOverworldBiomes.PALE_GROTTO, CustomOverworldBiomes.PALE_HOLLOW)), MobCategory.MONSTER, ModEntities.WATCHLING, 15, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.includeByKey(CustomOverworldBiomes.DEEP_CAVES, CustomOverworldBiomes.PALE_GROTTO,
+                CustomOverworldBiomes.PALE_HOLLOW, CustomOverworldBiomes.REGULAR_CAVE), MobCategory.MONSTER, ModEntities.WATCHLING, 12, 1, 1);
         SpawnPlacements.register(ModEntities.WATCHLING, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MobSpawning::canSpawnWatchling);
 
         // Mushroom caves: their creepers and spiders, by the biome's file
@@ -106,6 +117,61 @@ public class MobSpawning {
         // Nether:
         BiomeModifications.addSpawn(BiomeSelectors.includeByKey(Biomes.NETHER_WASTES), MobCategory.MONSTER, EntityTypes.BLAZE, 15, 1, 1);
 
+    }
+
+    /** Zombies' and skeletons' kin: on natural ground as they are, the sky left to their own rules. */
+    private static final Set<EntityType<?>> UNDEAD_KIN = Set.of(EntityTypes.HUSK, EntityTypes.ZOMBIE_VILLAGER, EntityTypes.STRAY,
+            EntityTypes.BOGGED, EntityTypes.PARCHED, EntityTypes.FROSTBITE);
+
+    /**
+     * Whether the mod's rules (overworldRules) apply to a natural spawn of this type in this dimension: the overworld's
+     * zombies, skeletons, creepers and spiders, and the zombies' and skeletons' kin. The nether's and the end's keep
+     * vanilla's (the soul sand valleys' skeletons stand on soul sand).
+     */
+    public static boolean ruled(EntityType<?> type, ResourceKey<Level> dimension) {
+        if (dimension != Level.OVERWORLD) return false;
+        return type == EntityTypes.ZOMBIE || type == EntityTypes.SKELETON || type == EntityTypes.CREEPER || type == EntityTypes.SPIDER
+                || UNDEAD_KIN.contains(type);
+    }
+
+    /** Spiders don't spawn naturally above this height: the mountains' heights. */
+    public static final int SPIDERS_MAX_Y = 128;
+
+    /**
+     * The mod's rules for a natural spawn of a vanilla monster, on top of the darkness the game asks of them all: what it
+     * stands on (natural ground, by its tag), the sky's light where it stands (full: it sees the sky, as the game's
+     * canSeeSky says), its height, the hour. True for the monsters these rules don't cover.
+     */
+    public static boolean overworldRules(EntityType<?> type, boolean naturalGround, int skyLight, int y, boolean midnight) {
+        boolean seesSky = skyLight >= 15;
+        // On natural ground only, at every hour; not below the pale line, where their pale kin spawn (PaleKin); midnight
+        // lifts only the rule against the open sky up high
+        if (type == EntityTypes.ZOMBIE || type == EntityTypes.SKELETON) return naturalGround && y >= PaleLine.Y && (midnight || !(y > 64 && seesSky));
+        // Only where the sky's light doesn't reach: caves, overhangs, under cover
+        if (type == EntityTypes.CREEPER) return naturalGround && skyLight == 0;
+        // In the dark as the others, the open sky included, but not on the mountains' heights nor below the pale line
+        if (type == EntityTypes.SPIDER) return y >= PaleLine.Y && y <= SPIDERS_MAX_Y;
+        // Zombies' and skeletons' kin on natural ground too (husks, strays and parched want the sky by their own rules)
+        if (UNDEAD_KIN.contains(type)) return naturalGround;
+        return true;
+    }
+
+    /**
+     * Vanilla's darkness check for a monster's spawn (Monster.isDarkEnoughToSpawn), from the sky's light the spawn check
+     * read already (its rules read it too): the same tests in the same order, the random drawn as vanilla draws it, the
+     * brightness worked out from that read and one of the block light as the light engine works it out (the brighter of
+     * the two, the sky's darkened; 15 past the world's edge). SpawnRulesGameTest holds it to vanilla's answer.
+     */
+    public static boolean darkEnoughToSpawn(ServerLevelAccessor world, BlockPos pos, RandomSource random, int skyLight) {
+        if (skyLight > random.nextInt(32)) return false;
+        DimensionType dimension = world.dimensionType();
+        int blockLight = world.getBrightness(LightLayer.BLOCK, pos);
+        int blockLightLimit = dimension.monsterSpawnBlockLightLimit();
+        if (blockLightLimit < 15 && blockLight > blockLightLimit) return false;
+        int darkening = world.getLevel().isThundering() ? 10 : world.getSkyDarken();
+        boolean inWorld = pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000;
+        int brightness = inWorld ? Math.max(blockLight, skyLight - darkening) : 15;
+        return brightness <= dimension.monsterSpawnLightTest().sample(random);
     }
 
     public static boolean isMidnightDuringNewMoon(LevelAccessor world) {
@@ -166,11 +232,24 @@ public class MobSpawning {
                 && world.getBlockState(blockPos.below()).is(BlockTags.WOLVES_SPAWNABLE_ON);
     }
 
-    /** A monster's spawn (in the dark), by the pale line, in total darkness off the pale biomes. */
+    /** No watchling spawns naturally within this many blocks of another: a watchling haunts one player at a time. */
+    public static final int WATCHLINGS_APART = 128;
+
+    /**
+     * A monster's spawn (in the dark), by the pale line, in total darkness off the pale biomes, and not within
+     * {@link #WATCHLINGS_APART} blocks of another watchling.
+     */
     public static boolean canSpawnWatchling(EntityType<WatchlingEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {
         if (!Monster.checkMonsterSpawnRules(type, world, spawnReason, blockPos, random)) return false;
         if (spawnReason != EntitySpawnReason.NATURAL) return true;
-        return palePlace(world, blockPos, 0);
+        return palePlace(world, blockPos, 0) && !watchlingNear(world, blockPos);
+    }
+
+    /** Whether a watchling is within {@link #WATCHLINGS_APART} blocks of the place. */
+    static boolean watchlingNear(EntityGetter world, BlockPos blockPos) {
+        Vec3 at = Vec3.atBottomCenterOf(blockPos);
+        return !world.getEntitiesOfClass(WatchlingEntity.class, new AABB(blockPos).inflate(WATCHLINGS_APART),
+                watchling -> watchling.distanceToSqr(at) < (double) WATCHLINGS_APART * WATCHLINGS_APART).isEmpty();
     }
 
     public static boolean canSpawnPaleZombie(EntityType<PaleZombieEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos blockPos, RandomSource random) {

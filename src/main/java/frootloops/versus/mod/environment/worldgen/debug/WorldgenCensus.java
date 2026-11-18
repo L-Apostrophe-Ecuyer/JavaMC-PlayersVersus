@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -23,12 +24,20 @@ import net.minecraft.world.level.levelgen.densityfunction.DensityBufferPool;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
+import net.fabricmc.loader.api.FabricLoader;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * What a biome's land is made of and what grows on it, counted on a generated world: the headless run's way of asking why
@@ -42,7 +51,8 @@ import java.util.function.Consumer;
  *   block is in;</li>
  *   <li>for each biome: the nearest patch of it (searched in {@code pv.worldgen.census.range} blocks, default 8000), then
  *   the full chunks {@code pv.worldgen.census.radius} chunks around its middle (default 4): per biome found there, its
- *   columns, how many a propagule could be planted on, the blocks under them, and the trees' blocks above them.</li>
+ *   columns, how many a propagule could be planted on, the blocks under them, and the trees' blocks above them;</li>
+ *   <li>the rocks features placed meanwhile, by the biome at their middle.</li>
  * </ul>
  */
 public final class WorldgenCensus {
@@ -62,7 +72,26 @@ public final class WorldgenCensus {
             "minecraft:dandelion", "players-versus:wheat_grass", "players-versus:clovers");
     private static final List<String> TAGS = List.of("supports_mangrove_propagule", "supports_vegetation", "substrate_overworld", "dirt", "mud");
 
+    /** The rocks placed by features while the census runs, by the biome at their middle. */
+    private static final Map<String, AtomicInteger> ROCKS = new ConcurrentHashMap<>();
+    private static final boolean REQUESTED = isRequested();
+
     private WorldgenCensus() {
+    }
+
+    /** Why rock ground was refused or kept (RockGroundFilter), while the census runs. */
+    private static final Map<String, AtomicInteger> ROCK_GROUND = new ConcurrentHashMap<>();
+
+    /** Counts what the rock ground filter said of a place: kept, or why not. */
+    public static void rockGround(String outcome) {
+        if (REQUESTED) ROCK_GROUND.computeIfAbsent(outcome, key -> new AtomicInteger()).incrementAndGet();
+    }
+
+    /** Counts a rock a feature placed (RockFeature), while the census runs. */
+    public static void rockPlaced(WorldGenLevel level, BlockPos at) {
+        if (!REQUESTED) return;
+        String biome = level.getBiome(at).unwrapKey().map(key -> key.identifier().toString()).orElse("?");
+        ROCKS.computeIfAbsent(biome, key -> new AtomicInteger()).incrementAndGet();
     }
 
     /** Headless mode for {@code runWorldgenSmoke}: run once when the server has started, then stop it. */
@@ -97,6 +126,9 @@ public final class WorldgenCensus {
             BlockPos middle = find(world, id, range, log);
             if (middle != null) count(world, id, middle, radius, log);
         }
+        // Against the columns of each biome counted above
+        log.accept("[pvwg] census rocks placed, by biome: " + new TreeMap<>(ROCKS));
+        log.accept("[pvwg] census rock ground, places tried: " + new TreeMap<>(ROCK_GROUND));
     }
 
     // Survival
@@ -137,7 +169,8 @@ public final class WorldgenCensus {
     // Finding a biome
 
     /** The middle of the nearest patch of a biome that the biome source places at sea level, or null. */
-    private static BlockPos find(ServerLevel world, String biome, int range, Consumer<String> log) {
+    @Nullable
+    public static BlockPos find(ServerLevel world, String biome, int range, Consumer<String> log) {
         RandomState noise = world.getChunkSource().randomState();
         DensityBufferPool buffers = noise.acquireDensityBufferPool();
         try {
@@ -184,7 +217,8 @@ public final class WorldgenCensus {
 
     private static final class Tally {
         int columns, plantable;
-        final Map<String, Integer> floors = new TreeMap<>(), blocks = new TreeMap<>(), onGround = new TreeMap<>();
+        final Map<String, Integer> floors = new TreeMap<>(), blocks = new TreeMap<>(), onGround = new TreeMap<>(), floating = new TreeMap<>();
+        final List<BlockPos> floatingAt = new ArrayList<>();
     }
 
     private static void count(ServerLevel world, String biome, BlockPos middle, int radius, Consumer<String> log) {
@@ -194,6 +228,9 @@ public final class WorldgenCensus {
         Map<String, Tally> tallies = new TreeMap<>();
         List<BlockPos> samples = new ArrayList<>();
         int inBiome = 0;
+        int side = (2 * radius + 1) * 16;
+        BufferedImage map = new BufferedImage(side, side, BufferedImage.TYPE_INT_RGB);
+        int originX = (center.x() - radius) * 16, originZ = (center.z() - radius) * 16;
         for (int chunkX = center.x() - radius; chunkX <= center.x() + radius; chunkX++) {
             for (int chunkZ = center.z() - radius; chunkZ <= center.z() + radius; chunkZ++) {
                 chunks.getChunk(chunkX, chunkZ, ChunkStatus.FULL, true);
@@ -204,6 +241,7 @@ public final class WorldgenCensus {
                         BlockPos ground = new BlockPos(x, top - 1, z);
                         while (ground.getY() > world.getMinY() && !isGround(world, ground)) ground = ground.below();
                         String name = world.getBiome(ground).getRegisteredName();
+                        map.setRGB(x - originX, z - originZ, groundColor(world, ground, top));
                         Tally tally = tallies.computeIfAbsent(name, key -> new Tally());
                         tally.columns++;
                         tally.floors.merge(path(world.getBlockState(ground)), 1, Integer::sum);
@@ -211,6 +249,7 @@ public final class WorldgenCensus {
                         if (name.equals(biome) && inBiome++ % COLUMN_SAMPLE_SPACING == 0) samples.add(new BlockPos(x, top, z));
                         String plant = path(world.getBlockState(ground.above()));
                         if (!isTree(plant)) tally.onGround.merge(plant, 1, Integer::sum);
+                        floating(world, x, z, tally);
                         for (int y = ground.getY() + 1; y <= ground.getY() + TREE_HEIGHT; y++) {
                             String block = path(world.getBlockState(new BlockPos(x, y, z)));
                             if (isTree(block)) tally.blocks.merge(block, 1, Integer::sum);
@@ -226,8 +265,58 @@ public final class WorldgenCensus {
             log.accept("[pvwg] census     ground: " + tally.floors);
             log.accept("[pvwg] census     on the ground: " + tally.onGround);
             log.accept("[pvwg] census     trees: " + tally.blocks);
+            if (!tally.floating.isEmpty()) log.accept("[pvwg] census     floating: " + tally.floating + " at " + tally.floatingAt);
         });
+        writeMap(map, biome, log);
         for (BlockPos sample : samples) column(world, sample, log);
+        Tally asked = tallies.get(biome.contains(":") ? biome : "minecraft:" + biome);
+        if (asked != null) for (int i = 0; i < Math.min(3, asked.floatingAt.size()); i++) column(world, asked.floatingAt.get(i * asked.floatingAt.size() / 3).above(3), log);
+    }
+
+    /**
+     * The ground as it is once the chunks are full (the bench's maps are of the terrain, before the features): each
+     * column's ground block in the bench's colours, shaded by height, and water by its depth.
+     */
+    private static int groundColor(ServerLevel world, BlockPos ground, int top) {
+        int depth = world.getHeight(Heightmap.Types.WORLD_SURFACE, ground.getX(), ground.getZ()) - 1 - ground.getY();
+        if (depth > 0 && !world.getFluidState(ground.above()).isEmpty()) {
+            return WorldgenBench.Region.scale(0x3F76E4, 1.0F - Math.min(depth, 12) / 12.0F * 0.6F);
+        }
+        float shade = 0.7F + 0.3F * Math.clamp((ground.getY() - 56) / 24.0F, 0.0F, 1.0F);
+        return WorldgenBench.Region.scale(WorldgenBench.Region.baseColor(world.getBlockState(ground)), shade);
+    }
+
+    private static void writeMap(BufferedImage map, String biome, Consumer<String> log) {
+        try {
+            Path dir = FabricLoader.getInstance().getGameDir().resolve("pvwg");
+            Files.createDirectories(dir);
+            Path file = dir.resolve("census-" + biome.replace(':', '_').replace('/', '_') + ".png");
+            ImageIO.write(map, "png", file.toFile());
+            log.accept("[pvwg] census map " + file);
+        } catch (IOException exception) {
+            log.accept("[pvwg] census map not written: " + exception);
+        }
+    }
+
+    /** How many floating positions are kept to show where, per biome. */
+    private static final int FLOATING_SAMPLES = 12;
+
+    /**
+     * Ground that floats in this column: a block of the ground (not a tree's, nor a lily pad) over air or water, from the
+     * top of the column down to sea level, as a feature that places ground where there is none leaves it (the small
+     * swamp mangrove's alter_ground did: its provider answered at any height, so it laid disks two blocks above the
+     * ground).
+     */
+    private static void floating(ServerLevel world, int x, int z, Tally tally) {
+        int top = world.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        for (int y = top - 1; y > world.getSeaLevel(); y--) {
+            BlockPos pos = new BlockPos(x, y, z);
+            if (!isGround(world, pos) || world.getBlockState(pos).is(Blocks.LILY_PAD)) continue;
+            BlockPos below = pos.below();
+            if (!world.getBlockState(below).getCollisionShape(world, below).isEmpty()) continue;
+            tally.floating.merge(path(world.getBlockState(pos)), 1, Integer::sum);
+            if (tally.floatingAt.size() < FLOATING_SAMPLES) tally.floatingAt.add(pos);
+        }
     }
 
     /** A column as it is: the heightmaps' heights, and the blocks from three above the ocean floor's down to six under it. */
@@ -254,9 +343,9 @@ public final class WorldgenCensus {
         return BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
     }
 
-    /** A tree's blocks (and what grows on them), as opposed to the ground and the air. */
+    /** A tree's blocks (and what grows on them), as opposed to the ground and the air: logs and the mod's tree blocks (a trunk's blocks) too. */
     private static boolean isTree(String path) {
-        return path.endsWith("_log") || path.endsWith("_leaves") || path.equals("mangrove_roots") || path.equals("mangrove_propagule")
+        return path.endsWith("_log") || path.endsWith("_tree") || path.endsWith("_leaves") || path.equals("mangrove_roots") || path.equals("mangrove_propagule")
                 || path.equals("vine") || path.equals("moss_carpet") || path.equals("bee_nest") || path.endsWith("_wood");
     }
 }

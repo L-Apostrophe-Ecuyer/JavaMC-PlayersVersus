@@ -217,6 +217,31 @@ public abstract class VersusSettings {
         public static float SHAKE_DEGREES = 2.0F;
     }
 
+    public static class Lemons {
+        // A lemon is a little food (1 hunger, no saturation) eaten in this many ticks
+        public static int EAT_TICKS = 40;
+        // Eating one makes one Sour this long, in ticks: the view widens at once and eases back (SourFov); slow as long, and
+        // hasty (Haste I) for this long
+        public static int SOUR_TICKS = 80;
+        public static int SLOWNESS_TICKS = 80;
+        public static int HASTE_TICKS = 480;
+        // How far the view widens at its widest (times the player's field of view, scaled by the FOV Effects slider)
+        public static float SOUR_PEAK = 1.9f;
+        // The view widens over this many ticks, and eases back over the last this many
+        public static int SOUR_RISE_TICKS = 2;
+        public static int SOUR_FALL_TICKS = 60;
+        // However wide the player's own field of view, Sour never takes it past this (degrees)
+        public static float SOUR_MAX_FOV = 165.0f;
+    }
+
+    public static class SulfurSpikes {
+        // A sulfur spike that hurts something (falling on it, or it falling onto one) poisons it for a whole number of
+        // seconds from POISON_SECONDS to the damage it dealt, and makes it nauseous for one from NAUSEA_SECONDS to the damage
+        // dealt (that many when it dealt less), each drawn evenly
+        public static int POISON_SECONDS = 1;
+        public static int NAUSEA_SECONDS = 5;
+    }
+
     public static class Mushrooms {
         // Brown and red mushrooms grow by stages of one, two and three, and below y 0 into pale shrooms (MushroomGrowth)
         public static boolean DO_STAGED_MUSHROOMS = true;
@@ -255,6 +280,14 @@ public abstract class VersusSettings {
         public static float EAT_TIME_POISON = 2.4F;
         public static float EAT_TIME_LIQUIDS = 1.0F;
         public static int BREWS_PER_NETHER_WART = 1; // Nether wart is the brewing stand's fuel
+    }
+
+    public static class Shulkers {
+        // The peek at a placed shulker box: how often the client asks for its contents while looking; how long the wheel
+        // must rest from the hotbar before the peek takes it; how long a slip of the crosshair off the box is forgiven
+        public static int PEEK_REFRESH_TICKS = 10;
+        public static int PEEK_WHEEL_REST_TICKS = 10;
+        public static int PEEK_SLIP_TICKS = 4;
     }
 
 }

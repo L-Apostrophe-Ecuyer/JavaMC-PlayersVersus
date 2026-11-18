@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:dark_forest",
+    "minecraft:dappled_forest",
+    "players-versus:forest_edge",
+    "players-versus:old_oak_forest",
+    "players-versus:prairie",
+    "players-versus:warm_oak_forest",
+    "players-versus:dark_birch_forest",
+    "players-versus:warm_dark_forest"
+  ]
+}

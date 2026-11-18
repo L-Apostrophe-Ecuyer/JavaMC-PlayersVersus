@@ -1,8 +1,6 @@
 {
   "replace": false,
   "values": [
-    "minecraft:slime",
-    "minecraft:magma_cube",
     "minecraft:spider",
     "minecraft:cave_spider",
     "players-versus:pale_spider",

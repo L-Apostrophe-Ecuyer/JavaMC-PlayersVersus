@@ -1,0 +1,9 @@
+# A sulfur pool on a slab of sulfur in the sky (a first view loads the place): its geysers, potent sulfur over magma
+name:sulfur_load
+at:1010,1030,180,0,2
+cmd:fill 990 190 990 1030 199 1030 minecraft:sulfur
+cmd:place feature minecraft:sulfur_pool 1010 199 1010
+name:sulfur_pool_up_close
+at:1010,1023,180,30,5
+name:sulfur_pool_from_above
+at:1010,1013,180,80,12

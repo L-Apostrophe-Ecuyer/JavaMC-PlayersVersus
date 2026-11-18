@@ -1,0 +1,217 @@
+{
+  "type": "minecraft:cache",
+  "input": {
+    "type": "minecraft:mul",
+    "left": {
+      "type": "minecraft:mul",
+      "left": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:square",
+            "input": {
+              "type": "minecraft:clamp",
+              "input": {
+                "type": "minecraft:mul",
+                "left": "minecraft:overworld/vegetation",
+                "right": 20.0
+              },
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "right": {
+            "type": "minecraft:add",
+            "left": 3.0,
+            "right": {
+              "type": "minecraft:mul",
+              "left": {
+                "type": "minecraft:clamp",
+                "input": {
+                  "type": "minecraft:mul",
+                  "left": "minecraft:overworld/vegetation",
+                  "right": 20.0
+                },
+                "min": 0.0,
+                "max": 1.0
+              },
+              "right": -2.0
+            }
+          }
+        },
+        "right": {
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:square",
+            "input": {
+              "type": "minecraft:clamp",
+              "input": {
+                "type": "minecraft:mul",
+                "left": {
+                  "type": "minecraft:add",
+                  "left": "minecraft:overworld/vegetation",
+                  "right": -0.3
+                },
+                "right": -20.000000000000004
+              },
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "right": {
+            "type": "minecraft:add",
+            "left": 3.0,
+            "right": {
+              "type": "minecraft:mul",
+              "left": {
+                "type": "minecraft:clamp",
+                "input": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:add",
+                    "left": "minecraft:overworld/vegetation",
+                    "right": -0.3
+                  },
+                  "right": -20.000000000000004
+                },
+                "min": 0.0,
+                "max": 1.0
+              },
+              "right": -2.0
+            }
+          }
+        }
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:square",
+            "input": {
+              "type": "minecraft:clamp",
+              "input": {
+                "type": "minecraft:mul",
+                "left": {
+                  "type": "minecraft:add",
+                  "left": "minecraft:overworld/erosion",
+                  "right": -0.3
+                },
+                "right": 16.666666666666668
+              },
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "right": {
+            "type": "minecraft:add",
+            "left": 3.0,
+            "right": {
+              "type": "minecraft:mul",
+              "left": {
+                "type": "minecraft:clamp",
+                "input": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:add",
+                    "left": "minecraft:overworld/erosion",
+                    "right": -0.3
+                  },
+                  "right": 16.666666666666668
+                },
+                "min": 0.0,
+                "max": 1.0
+              },
+              "right": -2.0
+            }
+          }
+        },
+        "right": {
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:square",
+            "input": {
+              "type": "minecraft:clamp",
+              "input": {
+                "type": "minecraft:mul",
+                "left": {
+                  "type": "minecraft:add",
+                  "left": "minecraft:overworld/erosion",
+                  "right": -0.6
+                },
+                "right": -16.666666666666682
+              },
+              "min": 0.0,
+              "max": 1.0
+            }
+          },
+          "right": {
+            "type": "minecraft:add",
+            "left": 3.0,
+            "right": {
+              "type": "minecraft:mul",
+              "left": {
+                "type": "minecraft:clamp",
+                "input": {
+                  "type": "minecraft:mul",
+                  "left": {
+                    "type": "minecraft:add",
+                    "left": "minecraft:overworld/erosion",
+                    "right": -0.6
+                  },
+                  "right": -16.666666666666682
+                },
+                "min": 0.0,
+                "max": 1.0
+              },
+              "right": -2.0
+            }
+          }
+        }
+      }
+    },
+    "right": {
+      "type": "minecraft:mul",
+      "left": {
+        "type": "minecraft:square",
+        "input": {
+          "type": "minecraft:clamp",
+          "input": {
+            "type": "minecraft:mul",
+            "left": {
+              "type": "minecraft:add",
+              "left": "minecraft:overworld/continents",
+              "right": -0.03
+            },
+            "right": 11.11111111111111
+          },
+          "min": 0.0,
+          "max": 1.0
+        }
+      },
+      "right": {
+        "type": "minecraft:add",
+        "left": 3.0,
+        "right": {
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:clamp",
+            "input": {
+              "type": "minecraft:mul",
+              "left": {
+                "type": "minecraft:add",
+                "left": "minecraft:overworld/continents",
+                "right": -0.03
+              },
+              "right": 11.11111111111111
+            },
+            "min": 0.0,
+            "max": 1.0
+          },
+          "right": -2.0
+        }
+      }
+    }
+  }
+}

@@ -1,8 +1,6 @@
 {
+  "replace": false,
   "values": [
-    "#minecraft:foxes_spawnable_on",
-    "minecraft:sand",
-    "minecraft:stone",
-    "minecraft:tuff"
+    "#players-versus:natural_ground"
   ]
 }

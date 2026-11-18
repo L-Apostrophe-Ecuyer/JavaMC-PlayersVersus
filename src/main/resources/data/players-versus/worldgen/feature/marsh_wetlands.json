@@ -1,0 +1,10 @@
+{
+  "type": "players-versus:marsh",
+  "biomes": [
+    "players-versus:grassy_wetlands"
+  ],
+  "edge": {
+    "id": "minecraft:rooted_dirt"
+  },
+  "dryness": 0.2
+}

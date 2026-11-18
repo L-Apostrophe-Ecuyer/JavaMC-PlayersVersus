@@ -16,16 +16,20 @@ import org.spongepowered.asm.mixin.Overwrite;
 @Mixin(Monster.class)
 public class HostileEntityMixin {
 
+    /**
+     * A monster's spawn: in peace none; other than naturally, the mob's own checks only (no darkness asked); naturally,
+     * the mod's rules for the overworld's (MobSpawning.overworldRules), then the darkness, from one read of the sky's
+     * light for both (MobSpawning.darkEnoughToSpawn, vanilla's check given that read).
+     */
     @Overwrite
     public static boolean checkMonsterSpawnRules(EntityType<? extends Monster> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
         if(world.getDifficulty() == Difficulty.PEACEFUL) return false;
         if(spawnReason != EntitySpawnReason.NATURAL) return Monster.checkMobSpawnRules(type, world, spawnReason, pos, random);
-        if(!MobSpawning.isMidnight(world)) {
-            if ((type == EntityTypes.ZOMBIE || type == EntityTypes.SKELETON) && (pos.getY() < 0 || !world.getBlockState(pos.below()).is(MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE) || (pos.getY() > 64 && world.canSeeSky(pos))))
-                return false;
-            else if (!MobSpawning.isNewMoon(world) && type == EntityTypes.CREEPER && (pos.getY() > 128 || world.getBrightness(LightLayer.SKY, pos) > 7 || !world.getBlockState(pos.below()).is(MobSpawning.CREEPER_SPAWNABLE)))
-                return false;
+        int skyLight = world.getBrightness(LightLayer.SKY, pos);
+        if (MobSpawning.ruled(type, world.getLevel().dimension())) {
+            boolean natural = world.getBlockState(pos.below()).is(type == EntityTypes.CREEPER ? MobSpawning.CREEPER_SPAWNABLE : MobSpawning.UNDEAD_OVERWORLD_SPAWNABLE);
+            if (!MobSpawning.overworldRules(type, natural, skyLight, pos.getY(), MobSpawning.isMidnight(world))) return false;
         }
-        return (Monster.isDarkEnoughToSpawn(world, pos, random)) && Monster.checkMobSpawnRules(type, world, spawnReason, pos, random);
+        return MobSpawning.darkEnoughToSpawn(world, pos, random, skyLight) && Monster.checkMobSpawnRules(type, world, spawnReason, pos, random);
     }
 }

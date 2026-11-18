@@ -155,6 +155,11 @@ public abstract class RegisteringCustomItems {
         registerCustomItem("wild_wheat", CustomBlockItems.WILD_WHEAT, CreativeModeTabs.NATURAL_BLOCKS);
         registerCustomItem("clovers", CustomBlockItems.CLOVERS, CreativeModeTabs.NATURAL_BLOCKS);
         registerCustomItem("fallen_leaves", CustomBlockItems.FALLEN_LEAVES);
+        registerCustomItem("cypress_leaves", CustomBlockItems.CYPRESS_LEAVES);
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.SPRUCE_LEAVES, CustomBlockItems.CYPRESS_LEAVES));
+        frootloops.versus.mod.items_and_effects.fruit.Fruits.create();
+        registerCustomItem("lemon", frootloops.versus.mod.items_and_effects.fruit.Fruits.LEMON);
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> output.insertAfter(Items.SWEET_BERRIES, frootloops.versus.mod.items_and_effects.fruit.Fruits.LEMON));
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.insertAfter(Items.LEAF_LITTER, CustomBlockItems.FALLEN_LEAVES));
         CustomBlockItems.TREE_BLOCKS.forEach((log, tree) -> {
             registerCustomItem(BuiltInRegistries.BLOCK.getKey(tree.getBlock()).getPath(), tree);

@@ -18,7 +18,18 @@
       "frootloops.versus.gametest.UndeadFormsGameTest",
       "frootloops.versus.gametest.BlightGameTest",
       "frootloops.versus.gametest.WatchlingGameTest",
-      "frootloops.versus.gametest.EndermanShulkerGameTest"
+      "frootloops.versus.gametest.EndermanShulkerGameTest",
+      "frootloops.versus.gametest.LemonsGameTest",
+      "frootloops.versus.gametest.RocksGameTest",
+      "frootloops.versus.gametest.WetlandsGameTest",
+      "frootloops.versus.gametest.TuscanGroveGameTest",
+      "frootloops.versus.gametest.RiverbanksGameTest",
+      "frootloops.versus.gametest.SpawnRulesGameTest",
+      "frootloops.versus.gametest.SulfurGameTest",
+      "frootloops.versus.gametest.ShulkersGameTest"
+    ],
+    "fabric-client-gametest": [
+      "frootloops.versus.gametest.client.WorldgenGallery"
     ]
   },
   "depends": {

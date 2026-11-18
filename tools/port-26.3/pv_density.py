@@ -143,7 +143,11 @@ def spaghetti(noise_name):
 
 # --- the functions (each mirrors the Java kernel it replaces) ------------------------------------------------------
 
-REF_OFFSET, REF_FACTOR, REF_JAGGEDNESS = mc("overworld/offset"), mc("overworld/factor"), mc("overworld/jaggedness")
+# The offset and factor are this mod's own (tools/terrain.py writes them: vanilla's splines, the shattered terrain moved
+# into the 3D-noise zone); the jaggedness is vanilla's
+REF_OFFSET, REF_FACTOR, REF_JAGGEDNESS = pv("overworld/offset"), pv("overworld/factor"), mc("overworld/jaggedness")
+REF_HUMIDITY, REF_EROSION = mc("overworld/vegetation"), mc("overworld/erosion")
+REF_NOISE_ZONE = pv("overworld/noise_zone")
 REF_RIDGES, REF_CONTINENTS = mc("overworld/ridges"), mc("overworld/continents")
 REF_BASE_3D, REF_ROUGHNESS = mc("overworld/base_3d_noise"), mc("overworld/caves/spaghetti_roughness_function")
 REF_DEPTH, REF_ENTRANCES = pv("overworld/depth"), pv("overworld/caves/entrances")
@@ -157,6 +161,24 @@ REF_UPPER_VALLEY, REF_UPPER_ACROSS = pv("overworld/high_river/upper_valley"), pv
 REF_BANK, REF_UPPER_BANK = pv("overworld/high_river/bank"), pv("overworld/high_river/upper_bank")
 REF_DRY_PATHS = pv("overworld/caves/dry_paths")
 REF_BASIN_LEVEL = pv("overworld/caves/basin_level")
+
+
+def smoothstep(x, start, end):
+    """0 at `start`, 1 at `end` (either way round), t * t * (3 - 2 * t) between, t the clamped distance from `start`."""
+    shifted = x if start == 0 else add(x, -start)
+    t = clamp(mul(shifted, 1.0 / (end - start)), 0.0, 1.0)
+    return mul(square(t), add(3.0, mul(t, -2.0)))
+
+
+def noise_zone():
+    """Where the shattered terrain is, 0 to 1: the box of humidity, erosion and continentalness in PvWorldgenConstants
+    (NOISE_ZONE_*), a smoothstep rising over each fade inside an edge; continentalness only from its low edge."""
+    humidity = mul(smoothstep(REF_HUMIDITY, C["NOISE_ZONE_HUMIDITY_MIN"], C["NOISE_ZONE_HUMIDITY_MIN"] + C["NOISE_ZONE_HUMIDITY_FADE"]),
+                   smoothstep(REF_HUMIDITY, C["NOISE_ZONE_HUMIDITY_MAX"], C["NOISE_ZONE_HUMIDITY_MAX"] - C["NOISE_ZONE_HUMIDITY_FADE"]))
+    erosion = mul(smoothstep(REF_EROSION, C["NOISE_ZONE_EROSION_MIN"], C["NOISE_ZONE_EROSION_MIN"] + C["NOISE_ZONE_EROSION_FADE"]),
+                  smoothstep(REF_EROSION, C["NOISE_ZONE_EROSION_MAX"], C["NOISE_ZONE_EROSION_MAX"] - C["NOISE_ZONE_EROSION_FADE"]))
+    inland = smoothstep(REF_CONTINENTS, C["NOISE_ZONE_CONTINENTALNESS_MIN"], C["NOISE_ZONE_CONTINENTALNESS_MIN"] + C["NOISE_ZONE_CONTINENTALNESS_FADE"])
+    return cache(mul(mul(humidity, erosion), inland))
 
 
 def depth():
@@ -175,11 +197,15 @@ def river_carver():
 
 
 def sloped_cheese():
-    """PvTerrain.slopedCheese: depth with jagged peaks, scaled by the factor, plus the 3D base noise; rivers cut in."""
+    """PvTerrain.slopedCheese: depth with jagged peaks, scaled by the factor, plus the 3D base noise; rivers cut in. In
+    the 3D-noise zone the base noise fades out between NOISE_CAP_FROM_Y and NOISE_CAP_TO_Y (Beta's heights): above the
+    second the density is the smooth depth's, so no ground stands there."""
     jagged = cache(noise(mc("jagged"), 1500.0, 0.0))
     with_peaks = add(REF_DEPTH, mul(REF_JAGGEDNESS, half_negative(jagged)))
     shaped = mul(with_peaks, REF_FACTOR)
-    return cache(min_(river_carver(), add(mul(quarter_negative(shaped), 4.0), REF_BASE_3D)))
+    faded = gradient(int(C["NOISE_CAP_FROM_Y"]), int(C["NOISE_CAP_TO_Y"]), 0.0, 1.0)
+    base = mul(REF_BASE_3D, sub(1.0, mul(REF_NOISE_ZONE, faded)))
+    return cache(min_(river_carver(), add(mul(quarter_negative(shaped), 4.0), base)))
 
 
 def terrain():
@@ -498,6 +524,7 @@ FUNCTIONS = {
     "overworld/ore_vein/copper_richness": lambda: vein_richness("copper"),
     "overworld/ore_vein/iron_density": lambda: vein_density("iron"),
     "overworld/ore_vein/iron_richness": lambda: vein_richness("iron"),
+    "overworld/noise_zone": noise_zone,
     "overworld/depth": depth,
     "overworld/sloped_cheese": sloped_cheese,
     "overworld/terrain": terrain,
@@ -523,8 +550,7 @@ FUNCTIONS = {
     "overworld/aquifer_barrier": lambda: noise(mc("aquifer_barrier"), 1.0, 0.5),
 }
 # Replaced by the functions above and gone: the kernels' inputs that only they read.
-GONE = ["overworld/high_river/channel.json", "overworld/high_river/depth.json", "overworld/high_river/terrain.json",
-        "overworld/preliminary_surface_level.json"]
+GONE = ["overworld/high_river/channel.json", "overworld/high_river/depth.json", "overworld/high_river/terrain.json"]
 
 
 def noise_settings():
@@ -556,7 +582,7 @@ def noise_settings():
                 "level": REF_BASIN_LEVEL,
             },
             "lava": noise(mc("aquifer_lava"), 1.0, 1.0),
-            "surface_level": mc("overworld/preliminary_surface_level"),
+            "surface_level": pv("overworld/preliminary_surface_level"),
         },
         "default_fluid": mc("water"),
         "disable_mob_generation": False,
@@ -564,7 +590,7 @@ def noise_settings():
         "material_rule": pv("overworld"),
         "noise": {"height": 336, "min_y": -64},
         "noise_router": {
-            "chunk_surface_level": mc("overworld/chunk_surface_level"),
+            "chunk_surface_level": pv("overworld/chunk_surface_level"),
             "continents": REF_CONTINENTS,
             "depth": REF_DEPTH,
             "erosion": mc("overworld/erosion"),

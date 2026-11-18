@@ -87,60 +87,88 @@
           "axolotls": [],
           "creature": [
             {
-              "type": "minecraft:sheep",
-              "weight": 12,
-              "count": 4
+              "type": "minecraft:parrot",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 2,
+                "min_inclusive": 1
+              },
+              "weight": 20
             },
             {
-              "type": "minecraft:llama",
-              "weight": 10,
-              "count": 4
+              "type": "minecraft:sheep",
+              "count": 4,
+              "weight": 6
+            },
+            {
+              "type": "minecraft:goat",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 3,
+                "min_inclusive": 1
+              },
+              "weight": 4
             },
             {
               "type": "minecraft:wolf",
-              "weight": 8,
-              "count": {
-                "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 4
-              }
+              "count": 4,
+              "weight": 2
             }
           ],
           "misc": [],
           "monster": [
             {
               "type": "minecraft:spider",
-              "weight": 100,
-              "count": 4
+              "count": 4,
+              "weight": 100
             },
             {
               "type": "minecraft:zombie",
-              "weight": 95,
-              "count": 4
+              "count": 4,
+              "weight": 95
+            },
+            {
+              "type": "minecraft:zombie_villager",
+              "count": 1,
+              "weight": 5
             },
             {
               "type": "minecraft:skeleton",
-              "weight": 100,
-              "count": 4
+              "count": 4,
+              "weight": 100
             },
             {
               "type": "minecraft:creeper",
-              "weight": 100,
-              "count": 4
+              "count": 4,
+              "weight": 100
             },
             {
               "type": "minecraft:slime",
-              "weight": 100,
-              "count": 4
+              "count": 4,
+              "weight": 100
             },
             {
               "type": "minecraft:enderman",
-              "weight": 10,
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 1,
-                "max_inclusive": 4
-              }
+                "max_inclusive": 4,
+                "min_inclusive": 1
+              },
+              "weight": 10
+            },
+            {
+              "type": "minecraft:witch",
+              "count": 1,
+              "weight": 5
+            },
+            {
+              "type": "minecraft:ocelot",
+              "count": {
+                "type": "minecraft:uniform",
+                "max_inclusive": 3,
+                "min_inclusive": 1
+              },
+              "weight": 2
             }
           ],
           "underground_water_creature": [

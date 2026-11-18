@@ -14,6 +14,14 @@
     "players.building.BlockItemMixin",
 
     "items_and_effects.recipes.RecipeFileMixin",
+    "items_and_effects.containers.AbstractContainerMenuShulkerMixin",
+    "items_and_effects.containers.BundleContentsMixin",
+    "items_and_effects.containers.ItemContainerContentsAccessor",
+    "items_and_effects.containers.ItemContainerContentsMixin",
+    "items_and_effects.containers.ItemShulkerClicksMixin",
+    "items_and_effects.containers.ItemShulkerTooltipMixin",
+    "items_and_effects.containers.ItemStackShulkerTooltipMixin",
+    "items_and_effects.containers.ShulkerBoxBlockInvoker",
     "items_and_effects.blight.LivingEntityBlightMixin",
     "items_and_effects.blight.MobBlightAttackMixin",
     "items_and_effects.blight.ServerPlayerBlightedDeathMixin",
@@ -45,6 +53,7 @@
     "environment.blocks.LadderMixin",
     "environment.blocks.LeafMovementMixin",
     "environment.blocks.LeavesMixin",
+    "environment.blocks.SulfurSpikeBlockMixin",
     "environment.blocks.FelledTreeDamageMixin",
     "environment.blocks.FelledTreeLandingMixin",
     "environment.blocks.TreeDigMixin",
@@ -90,6 +99,7 @@
     "items_and_effects.PotionBottleUsageMixin",
 
     "mobs.MobSpawnGroupsMixin",
+    "mobs.NaturalSpawnerPaleKinMixin",
     "mobs.hostile.HostileEntityMixin",
     "mobs.LandPathfindingMixin",
 

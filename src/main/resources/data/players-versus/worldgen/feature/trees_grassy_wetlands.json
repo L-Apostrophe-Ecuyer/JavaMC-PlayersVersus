@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "minecraft:oak_checked",
+  "features": [
+    {
+      "chance": 0.3,
+      "feature": {
+        "feature": "minecraft:swamp_oak",
+        "placement": [
+          {
+            "type": "minecraft:block_predicate_filter",
+            "predicate": {
+              "type": "minecraft:would_survive",
+              "state": {
+                "id": "minecraft:oak_sapling",
+                "properties": {
+                  "stage": "0"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "chance": 0.05,
+      "feature": "minecraft:fancy_oak_checked"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "minecraft:jungle_bush",
+    "placement": [
+      {
+        "type": "minecraft:surface_water_depth_filter",
+        "max_water_depth": 0
+      },
+      {
+        "type": "minecraft:block_predicate_filter",
+        "predicate": {
+          "type": "minecraft:would_survive",
+          "state": "minecraft:oak_sapling"
+        }
+      }
+    ]
+  },
+  "features": [
+    {
+      "chance": 0.45,
+      "feature": "minecraft:mangrove_checked"
+    },
+    {
+      "chance": 0.1,
+      "feature": "minecraft:tall_mangrove_checked"
+    }
+  ]
+}

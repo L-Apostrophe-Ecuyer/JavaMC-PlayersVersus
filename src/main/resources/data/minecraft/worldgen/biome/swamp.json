@@ -65,12 +65,13 @@
       "minecraft:spring_lava"
     ],
     [
-      "players-versus:swamp_small_mangroves",
-      "players-versus:swamp_patch_vegetation",
-      "players-versus:swamp_patch_rooted_dirt",
-      "players-versus:swamp_patch_pond",
+      "players-versus:marsh",
       "minecraft:glow_lichen",
-      "minecraft:trees_swamp",
+      "players-versus:trees_swamp",
+      "players-versus:waterlogged_leaves",
+      "players-versus:marsh_tall_grass",
+      "players-versus:marsh_reeds",
+      "players-versus:marsh_flowers",
       "minecraft:flower_swamp",
       "minecraft:patch_grass_normal",
       "minecraft:patch_dead_bush",

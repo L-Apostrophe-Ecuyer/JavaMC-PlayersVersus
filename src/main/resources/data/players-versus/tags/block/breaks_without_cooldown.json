@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "minecraft:leaf_litter",
     "players-versus:fallen_leaves"

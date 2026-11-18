@@ -1,0 +1,597 @@
+// THROWAWAY PROTOTYPE, kept as the reference for the approved look (see 2026-11-11-weathered-rocks-design.md).
+// Not compiled, not maintained: the mod's rock model is rebuilt from it test-first.
+package frootloops.versus.mod.environment.worldgen.rocks;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * SPIKE, throwaway. A rock as a few big blocks of rock that meet and overlap: each an angular block, a box whose faces
+ * are a little off square, its edges and corners cut off by planes, barely rounded. Blocks are joined with a little
+ * blending where they meet, so that a seam is a groove, not a slot. No noise on the faces. Shading from the top down only.
+ */
+final class Weathered {
+
+    /** An angular block: the planes bounding it (in its own frame), its centre and orientation. */
+    static final class Stone {
+        final double cx, cy, cz, reach, soft;
+        final double[] o, planes;
+        int group = -1;
+
+        Stone(double cx, double cy, double cz, double[] planes, double soft, double[] orientation, double reach) {
+            this.cx = cx;
+            this.cy = cy;
+            this.cz = cz;
+            this.planes = planes;
+            this.soft = soft;
+            this.o = orientation;
+            this.reach = reach;
+        }
+
+        Stone turned(double[] turn, double px, double py, double pz) {
+            double dx = this.cx - px, dy = this.cy - py, dz = this.cz - pz;
+            Stone stone = new Stone(px + turn[0] * dx + turn[1] * dy + turn[2] * dz, py + turn[3] * dx + turn[4] * dy + turn[5] * dz,
+                    pz + turn[6] * dx + turn[7] * dy + turn[8] * dz, this.planes, this.soft, multiply(turn, this.o), this.reach);
+            stone.group = this.group;
+            return stone;
+        }
+
+        /** About the distance in blocks, negative inside: the planes' soft maximum, so that the edges are barely rounded. */
+        double distance(double x, double y, double z) {
+            double px = x - this.cx, py = y - this.cy, pz = z - this.cz;
+            double[] o = this.o, p = this.planes;
+            double ux = o[0] * px + o[3] * py + o[6] * pz, uy = o[1] * px + o[4] * py + o[7] * pz, uz = o[2] * px + o[5] * py + o[8] * pz;
+            double max = -Double.MAX_VALUE;
+            for (int i = 0; i < p.length; i += 4) max = Math.max(max, p[i] * ux + p[i + 1] * uy + p[i + 2] * uz - p[i + 3]);
+            double sum = 0;
+            for (int i = 0; i < p.length; i += 4) sum += Math.exp((p[i] * ux + p[i + 1] * uy + p[i + 2] * uz - p[i + 3] - max) / this.soft);
+            return max + this.soft * Math.log(sum);
+        }
+    }
+
+    /**
+     * The planes of an angular block of half sizes ({@code a}, {@code b}, {@code c}): the six faces, each tipped off square
+     * by up to {@code skew}; then {@code cuts} planes across its edges and corners, cutting in to {@code depth} of the way
+     * out (lower: deeper), those on its upper half deeper by {@code crown}; {@code upright}: the cuts mostly across the
+     * upright edges (a prism's).
+     */
+    static double[] block(Dice dice, double a, double b, double c, int cuts, double depth, double crown, double skew, boolean upright) {
+        return block(dice, a, b, c, cuts, depth, crown, skew, upright, 0);
+    }
+
+    /** As above, and {@code bends} of its upright faces bent back above a line partway up: the face leans out toward its foot. */
+    static double[] block(Dice dice, double a, double b, double c, int cuts, double depth, double crown, double skew, boolean upright, int bends) {
+        List<double[]> planes = new ArrayList<>();
+        double[] half = {a, b, c};
+        for (int axis = 0; axis < 3; axis++) {
+            for (int sign = -1; sign <= 1; sign += 2) {
+                double[] n = new double[3];
+                n[axis] = sign;
+                for (int other = 0; other < 3; other++) if (other != axis) n[other] = dice.between(-skew, skew);
+                normalize(n);
+                planes.add(new double[]{n[0], n[1], n[2], half[axis] * Math.abs(n[axis])});
+            }
+        }
+        for (int k = 0; k < cuts; k++) {
+            double sx = dice.next() < 0.5 ? -1 : 1, sz = dice.next() < 0.5 ? -1 : 1, sy = dice.next() < 0.5 + 0.35 * crown ? 1 : -1;
+            double rx = dice.between(0.35, 1) / a, ry = dice.between(0.35, 1) / b, rz = dice.between(0.35, 1) / c;
+            // Across an edge (two of the three) or a corner (all three)
+            double pick = dice.next();
+            if (upright) ry = pick < 0.7 ? 0 : ry;
+            else if (pick < 0.25) rx = 0;
+            else if (pick < 0.5) rz = 0;
+            else if (pick < 0.65) ry = 0;
+            double[] n = {sx * rx, sy * ry, sz * rz};
+            normalize(n);
+            double support = a * Math.abs(n[0]) + b * Math.abs(n[1]) + c * Math.abs(n[2]);
+            double t = dice.between(depth, depth + 0.15) - (n[1] > 0.3 ? crown * 0.25 : 0);
+            planes.add(new double[]{n[0], n[1], n[2], support * Math.max(0.35, t)});
+        }
+        for (int k = 0; k < bends; k++) {
+            // The broader faces more often
+            int axis = dice.next() < c / (a + c) ? 0 : 2;
+            double sign = dice.next() < 0.5 ? -1 : 1, lean = dice.between(0.12, 0.32), at = dice.between(0.2, 0.6), out = axis == 0 ? a : c;
+            double[] n = new double[3];
+            n[axis] = sign * Math.cos(lean);
+            n[1] = Math.sin(lean);
+            planes.add(new double[]{n[0], n[1], n[2], Math.cos(lean) * out + Math.sin(lean) * (-b + 2 * b * at)});
+        }
+        double[] flat = new double[planes.size() * 4];
+        for (int i = 0; i < planes.size(); i++) System.arraycopy(planes.get(i), 0, flat, i * 4, 4);
+        return flat;
+    }
+
+    static void normalize(double[] n) {
+        double length = Math.sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+        for (int i = 0; i < 3; i++) n[i] /= length;
+    }
+
+    static double[] rotY(double a) {
+        double c = Math.cos(a), s = Math.sin(a);
+        return new double[]{c, 0, -s, 0, 1, 0, s, 0, c};
+    }
+
+    static double[] multiply(double[] a, double[] b) {
+        double[] m = new double[9];
+        for (int r = 0; r < 3; r++) {
+            for (int c = 0; c < 3; c++) m[r * 3 + c] = a[r * 3] * b[c] + a[r * 3 + 1] * b[3 + c] + a[r * 3 + 2] * b[6 + c];
+        }
+        return m;
+    }
+
+    /** A turn tipping the top toward {@code direction} (an angle in the level plane) by {@code angle}. */
+    static double[] tip(double direction, double angle) {
+        double ax = -Math.sin(direction), az = Math.cos(direction);
+        double cos = Math.cos(angle), sin = -Math.sin(angle), t = 1 - cos;
+        return new double[]{
+                t * ax * ax + cos, -sin * az, t * ax * az,
+                sin * az, cos, -sin * ax,
+                t * ax * az, sin * ax, t * az * az + cos};
+    }
+
+    static final class Dice {
+        long state;
+
+        Dice(long seed) {
+            this.state = RockNoise.mix(seed * 31 + 7);
+        }
+
+        double next() {
+            this.state = RockNoise.mix(this.state + 0x9E3779B97F4A7C15L);
+            return RockNoise.unit(this.state);
+        }
+
+        double between(double from, double to) {
+            return from + (to - from) * this.next();
+        }
+
+        int whole(int from, int to) {
+            return from + (int) Math.floor(this.next() * (to - from + 1));
+        }
+    }
+
+    final List<Stone> stones = new ArrayList<>();
+    /** The tall blocks standing on the ground: x, z, half sizes across, turn, top; smaller blocks prop their feet. */
+    final List<double[]> footprints = new ArrayList<>();
+    /** How far the rock widens where it meets the ground, curving out over {@link #flareHeight}. */
+    double flare, flareHeight = 1;
+    final long seed;
+    final double cover, blend;
+    double height;
+    int minX, minY, minZ, sizeX, sizeY, sizeZ;
+    byte[] cells;
+    float[] seam;
+
+    Weathered(long seed, double cover, double blend) {
+        this.seed = seed;
+        this.cover = cover;
+        this.blend = blend;
+    }
+
+    /** A block standing at (x, z), its foot {@code sink} into the ground, {@code tall} above it, tipped toward {@code direction}. */
+    void stand(double x, double z, double tall, double sink, double[] planes, double halfX, double halfZ, double yaw, double direction, double tilt) {
+        this.stones.add(standing(x, z, tall, sink, planes, halfX, halfZ, yaw, direction, tilt));
+        if (tall >= 6) this.footprints.add(new double[]{x, z, halfX, halfZ, yaw, tall});
+    }
+
+    static Stone standing(double x, double z, double tall, double sink, double[] planes, double halfX, double halfZ, double yaw, double direction, double tilt) {
+        double hy = (tall + sink) / 2;
+        Stone stone = new Stone(x, tall - hy, z, planes, 0.4, rotY(yaw), Math.sqrt(halfX * halfX + hy * hy + halfZ * halfZ) + 2);
+        return tilt == 0 ? stone : stone.turned(tip(direction, tilt), x, -sink, z);
+    }
+
+    /** About the rock's distance at a point, before blending: the nearest block's. */
+    double nearest(double x, double y, double z) {
+        double best = Double.MAX_VALUE;
+        for (Stone stone : this.stones) best = Math.min(best, stone.distance(x, y, z));
+        return best;
+    }
+
+    /** Smaller blocks propping the feet of the tall ones, leaning in against their faces, buried a little: one to three each. */
+    void feet(Dice dice, double chance) {
+        List<Stone> added = new ArrayList<>();
+        for (double[] foot : this.footprints) {
+            double x = foot[0], z = foot[1], hx = foot[2], hz = foot[3], yaw = foot[4], top = foot[5];
+            boolean tallBlock = top >= 16;
+            int count = tallBlock ? dice.whole(2, 4) : dice.whole(1, 3);
+            for (int k = 0; k < count; k++) {
+                double size = Math.max(1.6, (tallBlock ? dice.between(0.3, 0.5) : dice.between(0.22, 0.4)) * Math.max(hx, hz));
+                if (dice.next() > chance) continue;
+                // Against one of its faces, the broader more often, somewhere along it
+                boolean across = dice.next() < hz / (hx + hz);
+                double sign = dice.next() < 0.5 ? -1 : 1, along = dice.between(-0.6, 0.6);
+                double lx = across ? sign * (hx + 0.3 * size) : along * hx, lz = across ? along * hz : sign * (hz + 0.3 * size);
+                double wx = x + Math.cos(yaw) * lx - Math.sin(yaw) * lz, wz = z + Math.sin(yaw) * lx + Math.cos(yaw) * lz;
+                // Not where the rock already is
+                if (this.nearest(wx, 1, wz) < -0.5 * size) continue;
+                double tall = Math.clamp(top * (tallBlock ? dice.between(0.18, 0.4) : dice.between(0.14, 0.3)), 2, 14), sink = 1.2, c = size * dice.between(0.6, 0.9);
+                added.add(standing(wx, wz, tall, sink, block(dice, size, (tall + sink) / 2, c, dice.whole(6, 9), dice.between(0.6, 0.72), 0.6, 0.12, false),
+                        size, c, dice.between(0, Math.PI), Math.atan2(z - wz, x - wx), dice.between(0.1, 0.3)));
+            }
+        }
+        this.stones.addAll(added);
+    }
+
+    // The types
+
+    /** A boulder: a big angular block narrowing upward, one or two smaller ones leaning on it, a flat stone or two at its foot. */
+    static Weathered boulder(long seed, double height, double radius, double cover) {
+        Weathered rock = new Weathered(seed, cover, 0.6);
+        Dice dice = new Dice(seed);
+        double yaw = dice.between(0, Math.PI), mr = radius * dice.between(0.8, 1.0), sink = dice.between(1, 2), mz = mr * dice.between(0.7, 0.9);
+        rock.stand(0, 0, height, sink, block(dice, mr, (height + sink) / 2, mz, dice.whole(8, 12), dice.between(0.6, 0.72), 0.6, 0.12, false, dice.whole(1, 2)), mr, mz,
+                yaw, dice.between(0, 2 * Math.PI), dice.between(0, 0.12));
+        int more = dice.whole(1, 2);
+        double turn = dice.between(0, 2 * Math.PI);
+        for (int index = 0; index < more; index++) {
+            double angle = turn + index * dice.between(1.6, 2.6), size = dice.between(0.5, 0.72), away = mr * dice.between(0.95, 1.2);
+            double tall = height * dice.between(0.55, 0.85), a = mr * size, c = a * dice.between(0.7, 0.95), low = dice.between(1, 2);
+            rock.stand(away * Math.cos(angle), away * Math.sin(angle), tall, low, block(dice, a, (tall + low) / 2, c, dice.whole(6, 10), dice.between(0.6, 0.75), 0.5, 0.15, false, 1),
+                    a, c, dice.between(0, Math.PI), angle + Math.PI, dice.between(0.12, 0.35));
+        }
+        int plates = dice.whole(0, 2);
+        for (int index = 0; index < plates; index++) {
+            double angle = dice.between(0, 2 * Math.PI), away = mr * dice.between(0.9, 1.3), size = mr * dice.between(0.35, 0.55), tall = dice.between(1.2, 2.4);
+            rock.stand(away * Math.cos(angle), away * Math.sin(angle), tall, 1, block(dice, size, (tall + 1) / 2, size * 0.75, dice.whole(3, 6), 0.75, 0, 0.08, false),
+                    size, size * 0.75, dice.between(0, Math.PI), dice.between(0, 2 * Math.PI), dice.between(0, 0.1));
+        }
+        rock.feet(dice, 0.55);
+        rock.flare = 1.0;
+        rock.flareHeight = 3;
+        rock.height = height;
+        return rock;
+    }
+
+    /** A pile: flat angular stones in layers, each layer's narrower than the one under it, lying over and against each other. */
+    static Weathered pile(long seed, double height, double radius, double layer, double cover) {
+        Weathered rock = new Weathered(seed, cover, 0.5);
+        Dice dice = new Dice(seed);
+        double y = -dice.between(0.6, 1.2);
+        for (int k = 0; k < 12; k++) {
+            double thick = layer * dice.between(0.8, 1.2), mid = y + thick / 2;
+            double reach = radius * (1 - mid / height);
+            if (reach < 1.6) break;
+            int count = Math.max(1, (int) Math.round(reach * reach / (radius * 1.1)) + dice.whole(-1, 1));
+            double turn = dice.between(0, 2 * Math.PI);
+            for (int index = 0; index < count; index++) {
+                double angle = turn + 2 * Math.PI * (index + dice.between(-0.3, 0.3)) / count, away = count == 1 ? reach * dice.between(0, 0.25) : reach * dice.between(0.3, 0.6);
+                double a = reach * dice.between(0.45, 0.65), c = a * dice.between(0.6, 0.9), b = thick / 2 + 0.4;
+                double x = away * Math.cos(angle), z = away * Math.sin(angle);
+                Stone stone = new Stone(x, mid, z, block(dice, a, b, c, dice.whole(4, 8), dice.between(0.7, 0.82), 0.3, 0.08, false), 0.4,
+                        rotY(dice.between(0, Math.PI)), Math.sqrt(a * a + b * b + c * c) + 2);
+                rock.stones.add(stone.turned(tip(dice.between(0, 2 * Math.PI), dice.between(0, 0.12)), x, mid, z));
+            }
+            y += thick;
+        }
+        rock.flare = 0.5;
+        rock.flareHeight = 2;
+        rock.height = height;
+        return rock;
+    }
+
+    /**
+     * Castle-like: joints mostly upright, every {@code width} in two directions, and across every {@code joint} or so;
+     * each column of blocks its own height, lower outward ({@code flat}: how little lower), its top block cut at angles.
+     */
+    static Weathered castle(long seed, double height, double radius, double width, double joint, double flat, double lean, double cover) {
+        Weathered rock = new Weathered(seed, cover, 0.6);
+        Dice dice = new Dice(seed);
+        double yaw = dice.between(0, Math.PI);
+        double c = Math.cos(yaw), s = Math.sin(yaw);
+        double[] us = planes(dice, -radius, radius, width, 0.35), ws = planes(dice, -radius, radius, width, 0.35);
+        for (int i = 0; i + 1 < us.length; i++) {
+            for (int j = 0; j + 1 < ws.length; j++) {
+                double mu = (us[i] + us[i + 1]) / 2, mw = (ws[j] + ws[j + 1]) / 2, r = Math.hypot(mu, mw) / radius;
+                if (r > 0.8 + 0.35 * dice.next()) continue;
+                double top = height * (1 - (1 - flat) * Math.pow(Math.min(r, 1.2), 1.6)) * dice.between(0.72, 1.04);
+                if (top < 3) continue;
+                double hu = (us[i + 1] - us[i]) / 2 * dice.between(0.95, 1.1), hw = (ws[j + 1] - ws[j]) / 2 * dice.between(0.95, 1.1);
+                double ou = dice.between(-0.1, 0.1) * width, ow = dice.between(-0.1, 0.1) * width;
+                double x = c * (mu + ou) - s * (mw + ow), z = s * (mu + ou) + c * (mw + ow);
+                double turn = yaw + dice.between(-0.1, 0.1);
+                double y = -dice.between(1.5, 3);
+                while (y < top - 0.5) {
+                    double thick = joint * dice.between(0.7, 1.3);
+                    if (top - (y + thick) < 0.35 * joint) thick = top - y;
+                    boolean last = y + thick >= top - 0.01;
+                    double shrink = dice.between(0.9, 1.0), a = hu * shrink, cc = hw * shrink;
+                    // A block reaches a little into the one under it; only the column's top is cut at angles
+                    double bottom = y - (y > 0 ? 1.5 : 0), half = (y + thick - bottom) / 2;
+                    boolean first = y < 0;
+                    double[] planes = last ? block(dice, a, half, cc, dice.whole(5, 8), dice.between(0.62, 0.75), 0.9, 0.06, false, first ? dice.whole(1, 2) : 0)
+                            : block(dice, a, half, cc, dice.whole(2, 4), dice.between(0.78, 0.9), 0, 0.03, true, first ? dice.whole(1, 2) : 0);
+                    if (first && r > 0.5) rock.footprints.add(new double[]{x, z, a, cc, turn, top});
+                    Stone stone = new Stone(x, bottom + half, z, planes, 0.4, rotY(turn), Math.sqrt(a * a + half * half + cc * cc) + 2);
+                    stone.group = i * 1000 + j;
+                    rock.stones.add(stone);
+                    y += thick;
+                }
+            }
+        }
+        rock.height = height;
+        if (lean != 0) rock.lean(dice.between(0, 2 * Math.PI), lean);
+        rock.feet(dice, 0.85);
+        rock.flare = 3;
+        rock.flareHeight = 9;
+        return rock;
+    }
+
+    static double[] planes(Dice dice, double from, double to, double spacing, double jitter) {
+        List<Double> list = new ArrayList<>();
+        double p = from - spacing * (0.5 + dice.next());
+        while (p < to + spacing) {
+            list.add(p);
+            p += spacing * (1 + jitter * (2 * dice.next() - 1));
+        }
+        return list.stream().mapToDouble(Double::doubleValue).toArray();
+    }
+
+    /** A leaning monolith: a tall angular mass, a lower shoulder against it opposite its lean, stones at its foot. */
+    static Weathered monolith(long seed, double height, double width, double cover) {
+        Weathered rock = new Weathered(seed, cover, 0.8);
+        Dice dice = new Dice(seed);
+        double yaw = dice.between(0, 2 * Math.PI), c = Math.cos(yaw), s = Math.sin(yaw);
+        double hu = width / 2 * dice.between(0.9, 1.05), hw = width / 2 * dice.between(0.7, 0.85);
+        rock.stand(0, 0, height, 2, block(dice, hu, (height + 2) / 2, hw, dice.whole(9, 13), dice.between(0.62, 0.74), 0.7, 0.08, false, dice.whole(2, 3)), hu, hw, yaw, 0, 0);
+        double shoulder = height * dice.between(0.5, 0.68), su = hu * dice.between(0.7, 0.85), sw = hw * dice.between(0.85, 1.05);
+        double away = -(hu + su) * dice.between(0.7, 0.82), side = dice.between(-0.3, 0.3) * hw;
+        rock.stand(c * away - s * side, s * away + c * side, shoulder, 2, block(dice, su, (shoulder + 2) / 2, sw, dice.whole(8, 12), dice.between(0.6, 0.72), 0.7, 0.1, false, dice.whole(1, 2)),
+                su, sw, yaw + dice.between(-0.2, 0.2), 0, 0);
+        rock.height = height;
+        rock.lean(yaw, dice.between(0.16, 0.26));
+        rock.feet(dice, 0.9);
+        rock.flare = 3;
+        rock.flareHeight = 9;
+        return rock;
+    }
+
+    private void lean(double direction, double angle) {
+        double[] turn = tip(direction, angle);
+        List<Stone> turned = new ArrayList<>();
+        for (Stone stone : this.stones) turned.add(stone.turned(turn, 0, 0, 0));
+        this.stones.clear();
+        this.stones.addAll(turned);
+    }
+
+    // The voxels
+
+    int index(int x, int y, int z) {
+        return ((x - this.minX) * this.sizeZ + (z - this.minZ)) * this.sizeY + (y - this.minY);
+    }
+
+    boolean inside(int x, int y, int z) {
+        return x >= this.minX && x < this.minX + this.sizeX && y >= this.minY && y < this.minY + this.sizeY && z >= this.minZ && z < this.minZ + this.sizeZ;
+    }
+
+    boolean solid(int x, int y, int z) {
+        if (y < 0) return true;
+        return this.inside(x, y, z) && this.cells[this.index(x, y, z)] != 0;
+    }
+
+    void voxelize() {
+        double x0 = Double.MAX_VALUE, y0 = Double.MAX_VALUE, z0 = Double.MAX_VALUE, x1 = -Double.MAX_VALUE, y1 = -Double.MAX_VALUE, z1 = -Double.MAX_VALUE;
+        for (Stone stone : this.stones) {
+            x0 = Math.min(x0, stone.cx - stone.reach);
+            x1 = Math.max(x1, stone.cx + stone.reach);
+            y0 = Math.min(y0, stone.cy - stone.reach);
+            y1 = Math.max(y1, stone.cy + stone.reach);
+            z0 = Math.min(z0, stone.cz - stone.reach);
+            z1 = Math.max(z1, stone.cz + stone.reach);
+        }
+        this.minX = (int) Math.floor(x0) - 1;
+        this.minY = Math.max(-4, (int) Math.floor(y0) - 1);
+        this.minZ = (int) Math.floor(z0) - 1;
+        this.sizeX = (int) Math.ceil(x1) + 2 - this.minX;
+        this.sizeY = (int) Math.ceil(y1) + 2 - this.minY;
+        this.sizeZ = (int) Math.ceil(z1) + 2 - this.minZ;
+        this.cells = new byte[this.sizeX * this.sizeY * this.sizeZ];
+        this.seam = new float[this.cells.length];
+        double k = this.blend;
+        for (int x = this.minX; x < this.minX + this.sizeX; x++) {
+            for (int z = this.minZ; z < this.minZ + this.sizeZ; z++) {
+                for (int y = this.minY; y < this.minY + this.sizeY; y++) {
+                    double px = x + 0.5, py = y + 0.5, pz = z + 0.5, best = Double.MAX_VALUE, second = Double.MAX_VALUE, joined = Double.MAX_VALUE;
+                    int bestStone = -1, secondStone = -1;
+                    for (int at = 0; at < this.stones.size(); at++) {
+                        Stone stone = this.stones.get(at);
+                        if (Math.abs(px - stone.cx) > stone.reach || Math.abs(py - stone.cy) > stone.reach || Math.abs(pz - stone.cz) > stone.reach) continue;
+                        double d = stone.distance(px, py, pz);
+                        if (d < best) {
+                            second = best;
+                            secondStone = bestStone;
+                            best = d;
+                            bestStone = at;
+                        } else if (d < second) {
+                            second = d;
+                            secondStone = at;
+                        }
+                        // Blended where two stones meet: the seam a valley, not a slot
+                        if (joined == Double.MAX_VALUE) joined = d;
+                        else {
+                            double h = Math.max(k - Math.abs(joined - d), 0) / k;
+                            joined = Math.min(joined, d) - h * h * k / 4;
+                        }
+                    }
+                    int index = this.index(x, y, z);
+                    // The foot widens toward the ground, curving out
+                    double rise = Math.max(0, 1 - py / this.flareHeight);
+                    if (joined - this.flare * rise * rise < 0) this.cells[index] = (byte) (Tone.STONE.ordinal() + 1);
+                    // Only some seams are drawn, each whole; never the joints inside a column
+                    boolean drawn = secondStone >= 0 && (this.stones.get(bestStone).group < 0 || this.stones.get(bestStone).group != this.stones.get(secondStone).group)
+                            && RockNoise.unit(RockNoise.mix(this.seed + 31L * Math.min(bestStone, secondStone) + 7919L * Math.max(bestStone, secondStone))) < 0.5;
+                    this.seam[index] = drawn ? (float) Math.min(second - best, 99) : 99;
+                }
+            }
+        }
+        for (int pass = 0; pass < 2; pass++) {
+            byte[] next = this.cells.clone();
+            for (int x = this.minX; x < this.minX + this.sizeX; x++) {
+                for (int z = this.minZ; z < this.minZ + this.sizeZ; z++) {
+                    for (int y = Math.max(this.minY, 0); y < this.minY + this.sizeY; y++) {
+                        int solid = 0;
+                        for (int[] step : SIX) if (this.solid(x + step[0], y + step[1], z + step[2])) solid++;
+                        int index = this.index(x, y, z);
+                        if (this.cells[index] != 0 && solid <= 1) next[index] = 0;
+                        else if (this.cells[index] == 0 && solid >= 5) next[index] = (byte) (Tone.STONE.ordinal() + 1);
+                    }
+                }
+            }
+            this.cells = next;
+        }
+        this.light();
+        this.cover();
+    }
+
+    static final int[][] SIX = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
+    static final int[][] FOUR = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+    private double roll(int x, int y, int z, int salt) {
+        return RockNoise.unit(RockNoise.hash(this.seed + salt, x, y, z));
+    }
+
+    /** What a cell is: rock in five tones from dark to light, and what grows on it. */
+    enum Tone { DEEPSLATE, TUFF, STONE, ANDESITE, CLAY, MOSS, GRASS }
+
+    /** The share of open cells within two blocks: about a half on a flat face, more on an edge or a corner, less in a crease. */
+    private double openness(int x, int y, int z) {
+        int open = 0;
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dy = -2; dy <= 2; dy++) {
+                for (int dz = -2; dz <= 2; dz++) if ((dx | dy | dz) != 0 && !this.solid(x + dx, y + dy, z + dz)) open++;
+            }
+        }
+        return open / 124.0;
+    }
+
+    /** How far the face points up: the open cells' pull within two blocks, its height share. */
+    private double up(int x, int y, int z) {
+        double sx = 0, sy = 0, sz = 0;
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dy = -2; dy <= 2; dy++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    if ((dx | dy | dz) == 0 || this.solid(x + dx, y + dy, z + dz)) continue;
+                    sx += dx;
+                    sy += dy;
+                    sz += dz;
+                }
+            }
+        }
+        double length = Math.sqrt(sx * sx + sy * sy + sz * sz);
+        return length < 1e-6 ? 0 : sy / length;
+    }
+
+    /** The share of the sky the cell sees: of five rays, straight up and tipped a half right angle four ways, those that get out. */
+    private double sky(int x, int y, int z) {
+        int[][] rays = {{0, 1, 0}, {1, 1, 0}, {-1, 1, 0}, {0, 1, 1}, {0, 1, -1}};
+        int free = 0;
+        for (int[] ray : rays) {
+            boolean blocked = false;
+            for (int step = 1; step <= 16 && !blocked; step++) blocked = this.solid(x + ray[0] * step, y + ray[1] * step, z + ray[2] * step);
+            if (!blocked) free++;
+        }
+        return free / 5.0;
+    }
+
+    /**
+     * Light painted into the stone, from above: what sees the sky, faces up, stands out and stands high is light; what
+     * faces down, is shut in, or lies low is dark. Undersides, inside corners and the drawn cracks are tuff (deepslate
+     * where deepest); the rest goes from deepslate through tuff, stone and andesite to clay by its light, most of it stone.
+     */
+    private void light() {
+        int top = 1;
+        for (int x = this.minX; x < this.minX + this.sizeX; x++) {
+            for (int z = this.minZ; z < this.minZ + this.sizeZ; z++) {
+                for (int y = this.minY + this.sizeY - 1; y > top; y--) if (this.cells[this.index(x, y, z)] != 0) top = y;
+            }
+        }
+        byte[] toned = this.cells.clone();
+        java.util.List<int[]> lit = new java.util.ArrayList<>();
+        java.util.List<Double> values = new java.util.ArrayList<>();
+        for (int x = this.minX; x < this.minX + this.sizeX; x++) {
+            for (int z = this.minZ; z < this.minZ + this.sizeZ; z++) {
+                for (int y = Math.max(this.minY, 0); y < this.minY + this.sizeY; y++) {
+                    int index = this.index(x, y, z);
+                    if (this.cells[index] == 0) continue;
+                    boolean exposed = false;
+                    for (int[] step : SIX) exposed |= !this.solid(x + step[0], y + step[1], z + step[2]);
+                    if (!exposed) continue;
+                    double open = this.openness(x, y, z), up = this.up(x, y, z);
+                    boolean under = y > 0 && !this.solid(x, y - 1, z) && up < -0.3;
+                    Tone tone = null;
+                    if (under) tone = Tone.TUFF;
+                    else if (this.seam[index] < 1.0 && open < 0.55) tone = Tone.TUFF;
+                    else if (open < 0.36) tone = Tone.TUFF;
+                    if (tone != null) {
+                        toned[index] = (byte) (tone.ordinal() + 1);
+                        continue;
+                    }
+                    double patch = 0.07 * RockNoise.noise(this.seed + 50, x / 4.0, y / 4.0, z / 4.0) + 0.05 * (this.roll(x, y, z, 51) - 0.5);
+                    double light = 0.35 * this.sky(x, y, z) + 0.25 * up + 0.8 * (open - 0.5) + 0.65 * y / top + patch;
+                    lit.add(new int[]{x, y, z});
+                    values.add(light);
+                }
+            }
+        }
+        // The tones by share of the lit faces: a little deepslate, some tuff, most stone, some andesite, a touch of clay
+        double[] sorted = values.stream().mapToDouble(Double::doubleValue).sorted().toArray();
+        double t2 = quantile(sorted, 0.3), t3 = quantile(sorted, 0.76), t4 = quantile(sorted, 0.97);
+        for (int i = 0; i < lit.size(); i++) {
+            int[] cell = lit.get(i);
+            double light = values.get(i);
+            Tone tone = light < t2 ? Tone.TUFF : light < t3 ? Tone.STONE : light < t4 ? Tone.ANDESITE : Tone.CLAY;
+            toned[this.index(cell[0], cell[1], cell[2])] = (byte) (tone.ordinal() + 1);
+        }
+        this.cells = toned;
+    }
+
+    private static double quantile(double[] sorted, double share) {
+        return sorted.length == 0 ? 0 : sorted[Math.min(sorted.length - 1, (int) (share * sorted.length))];
+    }
+
+    private void cover() {
+        if (this.cover <= 0) return;
+        int[] tops = new int[this.sizeX * this.sizeZ];
+        for (int x = this.minX; x < this.minX + this.sizeX; x++) {
+            for (int z = this.minZ; z < this.minZ + this.sizeZ; z++) {
+                int top = Integer.MIN_VALUE;
+                for (int y = this.minY + this.sizeY - 1; y >= 0; y--) {
+                    if (this.cells[this.index(x, y, z)] != 0) {
+                        top = y;
+                        break;
+                    }
+                }
+                tops[(x - this.minX) * this.sizeZ + (z - this.minZ)] = top;
+            }
+        }
+        for (int x = this.minX + 1; x < this.minX + this.sizeX - 1; x++) {
+            for (int z = this.minZ + 1; z < this.minZ + this.sizeZ - 1; z++) {
+                int top = tops[(x - this.minX) * this.sizeZ + (z - this.minZ)];
+                if (top < 1) continue;
+                int level = 0;
+                for (int[] step : FOUR) {
+                    int other = tops[(x + step[0] - this.minX) * this.sizeZ + (z + step[1] - this.minZ)];
+                    if (Math.abs(other - top) <= 1) level++;
+                }
+                double chance = this.cover * (0.45 + 0.55 * Math.min(1, top / Math.max(4, 0.6 * this.height)));
+                double patch = RockNoise.noise(this.seed + 40, x / 5.0, top / 5.0, z / 5.0);
+                if (level < 3 || patch >= 2 * chance - 1 + 0.15 * (this.roll(x, top, z, 41) - 0.5)) continue;
+                boolean moss = RockNoise.noise(this.seed + 42, x / 3.5, top / 3.5, z / 3.5) > -0.25;
+                this.cells[this.index(x, top, z)] = (byte) ((moss ? Tone.MOSS : Tone.GRASS).ordinal() + 1);
+                for (int[] step : FOUR) {
+                    int ex = x + step[0], ez = z + step[1];
+                    if (this.solid(ex, top, ez)) continue;
+                    for (int down = 1; down <= 2; down++) {
+                        if (!this.inside(x, top - down, z) || this.cells[this.index(x, top - down, z)] == 0 || this.solid(ex, top - down, ez)) break;
+                        if (this.roll(x, top - down, z, 43 + down) < 0.55) this.cells[this.index(x, top - down, z)] = (byte) (Tone.MOSS.ordinal() + 1);
+                    }
+                }
+            }
+        }
+    }
+
+    Tone at(int x, int y, int z) {
+        if (!this.inside(x, y, z)) return null;
+        byte cell = this.cells[this.index(x, y, z)];
+        return cell == 0 ? null : Tone.values()[cell - 1];
+    }
+}

@@ -1,0 +1,12 @@
+# Eyes and carried blocks whole by see-through bodies: an enderman holding a pumpkin and a phantom, each some 20 degrees
+# off the middle of the view, facing the camera, on a lit platform up in the sky. A first view loads the place, so the
+# commands find it loaded.
+name:gaze_load
+at:1010,1014,180,0,2
+cmd:fill 1000 199 1000 1020 199 1020 minecraft:grass_block
+cmd:summon minecraft:enderman 1014 200 1004 {NoAI:1b,PersistenceRequired:1b,Silent:1b,carriedBlockState:{id:"minecraft:pumpkin"},Rotation:[22f,0f]}
+cmd:summon minecraft:phantom 1006 202 1004 {NoAI:1b,PersistenceRequired:1b,Silent:1b,Rotation:[-22f,0f],equipment:{head:{id:"minecraft:stick",count:1}}}
+name:gaze_edge
+at:1010,1014,180,0,2
+name:gaze_on_enderman
+at:1010,1014,158,10,2

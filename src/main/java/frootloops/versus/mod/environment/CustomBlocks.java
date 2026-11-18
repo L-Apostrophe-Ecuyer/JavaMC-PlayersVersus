@@ -26,6 +26,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
@@ -42,6 +43,7 @@ import net.minecraft.world.level.block.sounds.BlockSoundSets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 public class CustomBlocks {
@@ -79,6 +81,8 @@ public class CustomBlocks {
     public static Block WILD_WHEAT;
     public static Block CLOVERS;
     public static FallenLeavesBlock FALLEN_LEAVES;
+    /** The cypress's lighter leaves, for highlights among its spruce leaves: spruce leaves in azalea leaves' colours. */
+    public static LeavesBlock CYPRESS_LEAVES;
     // What growing trees are made of (TreeBlock), one per wood, by the vanilla log each stands for
     public static final Map<Block, TreeBlock> TREE_BLOCKS = new LinkedHashMap<>();
 
@@ -161,6 +165,8 @@ public class CustomBlocks {
         CLOVERS = registerBlock("clovers", new CloverBlock(getSettings("clovers", Blocks.SHORT_GRASS)));
         FALLEN_LEAVES = (FallenLeavesBlock) registerBlock("fallen_leaves", new FallenLeavesBlock(getSettings("fallen_leaves", Blocks.LEAF_LITTER).mapColor(MapColor.PLANT)));
         FlammableBlockRegistry.getDefaultInstance().add(FALLEN_LEAVES, 60, 100);
+        CYPRESS_LEAVES = (LeavesBlock) registerBlock("cypress_leaves", new LeavesBlock(Optional.empty(), getSettings("cypress_leaves", Blocks.SPRUCE_LEAVES)));
+        FlammableBlockRegistry.getDefaultInstance().add(CYPRESS_LEAVES, 30, 60); // as leaves
 
         for (Block log : List.of(Blocks.OAK_LOG, Blocks.SPRUCE_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.CHERRY_LOG,
                 Blocks.DARK_OAK_LOG, Blocks.PALE_OAK_LOG, Blocks.MANGROVE_LOG, Blocks.POPLAR_LOG)) {

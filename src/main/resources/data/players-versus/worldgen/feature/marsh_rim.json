@@ -1,0 +1,11 @@
+{
+  "type": "players-versus:marsh",
+  "biomes": [
+    "players-versus:humid_oak_forest"
+  ],
+  "edge": {
+    "id": "minecraft:rooted_dirt"
+  },
+  "dryness": 0.25,
+  "reshape": false
+}

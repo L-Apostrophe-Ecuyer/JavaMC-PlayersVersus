@@ -1,0 +1,10 @@
+{
+  "type": "players-versus:marsh",
+  "biomes": [
+    "players-versus:mangrove_marsh"
+  ],
+  "edge": {
+    "id": "minecraft:mud"
+  },
+  "dryness": 0.1
+}

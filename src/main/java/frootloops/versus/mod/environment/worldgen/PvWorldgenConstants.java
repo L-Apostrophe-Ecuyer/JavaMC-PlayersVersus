@@ -289,4 +289,31 @@ public final class PvWorldgenConstants {
      * further inside a body is surrounded by water and doesn't need one.
      */
     public static final double FLUID_TICK_MARGIN = 0.2;
+
+    // ------------------------------------------------------------------------------------------------------------
+    // The 3D-noise zone: where the shattered, overhanging terrain is
+    // ------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The zone's box in the climate: humidity 0 to 0.3, erosion 0.3 to 0.6, continentalness from 0.03 (inland: where
+     * vanilla puts its windswept biomes). The terrain's window ({@code players-versus:overworld/noise_zone}) is 1 inside
+     * it, a smooth edge of the fades below within it, and 0 outside; the biome layout and the rocks keep to the box.
+     */
+    public static final double NOISE_ZONE_HUMIDITY_MIN = 0.0;
+    public static final double NOISE_ZONE_HUMIDITY_MAX = 0.3;
+    public static final double NOISE_ZONE_EROSION_MIN = 0.3;
+    public static final double NOISE_ZONE_EROSION_MAX = 0.6;
+    public static final double NOISE_ZONE_CONTINENTALNESS_MIN = 0.03;
+
+    /** How far inside each edge of the box the window rises (the continentalness only at its low edge), about 30 to 60 blocks. */
+    public static final double NOISE_ZONE_HUMIDITY_FADE = 0.05;
+    public static final double NOISE_ZONE_EROSION_FADE = 0.06;
+    public static final double NOISE_ZONE_CONTINENTALNESS_FADE = 0.09;
+
+    /**
+     * In the zone, the 3D base noise fades out from the first height (none of it left at the second): Beta's world was
+     * 128 tall, its hills between 64 and 110, so no ground of the zone stands over y 128.
+     */
+    public static final double NOISE_CAP_FROM_Y = 100.0;
+    public static final double NOISE_CAP_TO_Y = 128.0;
 }

@@ -1,0 +1,12 @@
+{
+  "type": "players-versus:marsh",
+  "biomes": [
+    "players-versus:cold_swamp"
+  ],
+  "edge": {
+    "id": "minecraft:podzol",
+    "properties": {
+      "snowy": "false"
+    }
+  }
+}

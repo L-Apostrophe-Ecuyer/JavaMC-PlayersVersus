@@ -1,0 +1,50 @@
+{
+  "structures": [
+    {
+      "structure": "players-versus:rock/monolith",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/spires",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/towers",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/great_boulders",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/massif",
+      "weight": 1
+    },
+    {
+      "structure": "players-versus:rock/icy_monolith",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/icy_spires",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/icy_towers",
+      "weight": 2
+    },
+    {
+      "structure": "players-versus:rock/icy_great_boulders",
+      "weight": 3
+    },
+    {
+      "structure": "players-versus:rock/icy_massif",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1734120691,
+    "spacing": 7,
+    "separation": 3
+  }
+}

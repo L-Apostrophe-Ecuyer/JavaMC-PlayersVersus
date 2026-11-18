@@ -95,65 +95,75 @@
           "axolotls": [],
           "creature": [
             {
-              "type": "minecraft:pig",
-              "weight": 10,
-              "count": 4
+              "type": "minecraft:camel",
+              "count": 1,
+              "weight": 8
             },
             {
-              "type": "minecraft:camel",
-              "weight": 8,
+              "type": "minecraft:rabbit",
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 2,
-                "max_inclusive": 4
-              }
+                "max_inclusive": 3,
+                "min_inclusive": 2
+              },
+              "weight": 6
             }
           ],
           "misc": [],
           "monster": [
             {
               "type": "minecraft:spider",
-              "weight": 100,
-              "count": 4
+              "count": 4,
+              "weight": 100
             },
             {
               "type": "minecraft:zombie",
-              "weight": 95,
-              "count": 4
+              "count": 4,
+              "weight": 19
             },
             {
               "type": "minecraft:zombie_villager",
-              "weight": 5,
-              "count": 1
+              "count": 1,
+              "weight": 1
             },
             {
               "type": "minecraft:skeleton",
-              "weight": 100,
-              "count": 4
+              "count": 4,
+              "weight": 50
             },
             {
               "type": "minecraft:creeper",
-              "weight": 100,
-              "count": 4
+              "count": 4,
+              "weight": 100
             },
             {
               "type": "minecraft:slime",
-              "weight": 100,
-              "count": 4
+              "count": 4,
+              "weight": 100
             },
             {
               "type": "minecraft:enderman",
-              "weight": 10,
               "count": {
                 "type": "minecraft:uniform",
-                "min_inclusive": 1,
-                "max_inclusive": 4
-              }
+                "max_inclusive": 4,
+                "min_inclusive": 1
+              },
+              "weight": 10
             },
             {
-              "type": "minecraft:cave_spider",
-              "weight": 5,
-              "count": 1
+              "type": "minecraft:witch",
+              "count": 1,
+              "weight": 5
+            },
+            {
+              "type": "minecraft:husk",
+              "count": 4,
+              "weight": 80
+            },
+            {
+              "type": "minecraft:parched",
+              "count": 4,
+              "weight": 50
             }
           ],
           "underground_water_creature": [

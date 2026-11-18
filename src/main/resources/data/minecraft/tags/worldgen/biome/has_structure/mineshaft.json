@@ -1,22 +1,20 @@
 {
   "replace": false,
   "values": [
-    "players-versus:birch_taiga_forest",
-    "players-versus:dappled_taiga",
-    "players-versus:sparse_dappled_forest",
-    "players-versus:dark_taiga_forest",
-    "players-versus:dark_birch_forest",
-    "players-versus:cold_beach",
     "players-versus:cold_plains",
-    "players-versus:cold_taiga",
-    "players-versus:mountainside_jungle",
-    "players-versus:mountainside_forest",
-    "players-versus:mountainside_forest_warm",
     "players-versus:desert_oasis",
     "players-versus:caves/creeper_caves_desert",
     "players-versus:caves/badlands_cave",
     "players-versus:caves/creeper_caves",
     "players-versus:caves/regular_cave",
-    "players-versus:caves/pale_grotto"
+    "players-versus:caves/pale_grotto",
+    "players-versus:tuscan_grove",
+    "players-versus:cold_swamp",
+    "players-versus:rocky_plains",
+    "players-versus:grassy_wetlands",
+    "players-versus:mangrove_marsh",
+    "players-versus:prairie",
+    "players-versus:pale_swamp",
+    "players-versus:rocky_snowy_plains"
   ]
 }

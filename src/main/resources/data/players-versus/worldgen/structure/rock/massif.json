@@ -1,0 +1,14 @@
+{
+  "type": "players-versus:rock_formation",
+  "biomes": "#players-versus:has_structure/rock_formation",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "rock": {
+    "bodies": [
+      {
+        "shape": "massif"
+      }
+    ]
+  }
+}

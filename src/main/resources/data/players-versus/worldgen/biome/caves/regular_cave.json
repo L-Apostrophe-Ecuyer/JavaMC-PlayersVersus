@@ -121,8 +121,17 @@
             },
             {
               "type": "players-versus:pale_creeper",
-              "weight": 20,
+              "weight": 120,
               "count": 1
+            },
+            {
+              "type": "players-versus:pale_spider",
+              "weight": 40,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 1,
+                "max_inclusive": 2
+              }
             },
             {
               "type": "players-versus:pale_zombie",
